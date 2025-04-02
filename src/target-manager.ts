@@ -263,7 +263,7 @@ export function handleTargetHit(
     scene: Scene,
     createExplosionCallback: (position: Vector3) => void,
     updateScoreCallback: (points: number) => void,
-    gameOverCallback: () => void,
+    gameOverCallback: (reason?: string) => void,
     onTargetRemoved: () => void
 ): boolean {
     const targetIndex = targets.indexOf(hitTarget);
@@ -302,7 +302,7 @@ export function handleTargetHit(
     } else {
         console.log('%cÉCHEC : Mauvaise cible éliminée !', 'color: red;');
         console.log(`Vous avez touché ID ${hitTarget.identity.id} (${hitTarget.identity.name}), mais la cible était ID ${designatedTarget?.identity.id} (${designatedTarget?.identity.name})`);
-        gameOverCallback();
+        gameOverCallback('target');
         return true;
     }
 }

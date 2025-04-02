@@ -12,6 +12,9 @@ let brickTexture: Texture;
 let concreteTexture: Texture;
 let grassTexture: Texture;
 let fenceTexture: Texture;
+let willowTexture: Texture;
+let leafTexture: Texture;
+let bushTexture: Texture;
 
 export function initializeTextures(config: TextureConfig): void {
     const { buildingSize, muretHeight, parkSize } = config;
@@ -35,6 +38,21 @@ export function initializeTextures(config: TextureConfig): void {
     fenceTexture.wrapS = RepeatWrapping;
     fenceTexture.wrapT = RepeatWrapping;
     fenceTexture.repeat.set(parkSize / 5, 1);
+    
+    willowTexture = textureLoader.load('textures/willow.jpg');
+    willowTexture.wrapS = RepeatWrapping;
+    willowTexture.wrapT = RepeatWrapping;
+    willowTexture.repeat.set(2, 2);
+    
+    leafTexture = textureLoader.load('textures/leaf.jpg');
+    leafTexture.wrapS = RepeatWrapping;
+    leafTexture.wrapT = RepeatWrapping;
+    leafTexture.repeat.set(3, 3);
+    
+    bushTexture = textureLoader.load('textures/bush.jpg');
+    bushTexture.wrapS = RepeatWrapping;
+    bushTexture.wrapT = RepeatWrapping;
+    bushTexture.repeat.set(2, 2);
 }
 
-export { brickTexture, concreteTexture, grassTexture, fenceTexture }; 
+export { brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture, bushTexture }; 

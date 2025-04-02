@@ -19,7 +19,8 @@ import {
   MeshBasicMaterial,
   SphereGeometry,
   Clock,
-  CircleGeometry
+  CircleGeometry,
+  CylinderGeometry
 } from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
@@ -29,12 +30,36 @@ import {
   defaultFov, particleLife, particleSpeed,
   playerMoveSpeed, fovLerpFactor, fenceHeight, shadowCamSize
 } from './constants';
-import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture } from './texture-manager';
+import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture, bushTexture } from './texture-manager';
 import { initializeCommandHandling, CommandState } from './commands';
-import { initializeTargets, updateTargets, getTargets, handleTargetHit, checkAndSpawnTarget } from './target-manager';
+import { initializeTargets, updateTargets, getTargets, handleTargetHit as importedHandleTargetHit, checkAndSpawnTarget as importedCheckAndSpawnTarget } from './target-manager';
 import Stats from 'stats.js';
 
 const scene = new Scene()
+
+// Ajouter des styles pour empêcher la sélection de texte
+document.head.insertAdjacentHTML('beforeend', `
+  <style>
+    body, #score-display, #timer-display, #instructions, #objective-display, 
+    #game-over, #start-screen, .scope-line, #sniper-pov,
+    .game-over-content, .start-content, h2, p, span, div {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      cursor: default;
+    }
+
+    img, canvas {
+      user-drag: none;
+      -webkit-user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+  </style>
+`);
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -50,11 +75,16 @@ scoreDisplay.id = 'score-display';
 scoreDisplay.innerHTML = 'Score: 0';
 document.body.appendChild(scoreDisplay);
 
+const timerDisplay = document.createElement('div');
+timerDisplay.id = 'timer-display';
+timerDisplay.innerHTML = '30.0';
+document.body.appendChild(timerDisplay);
+
 const gameOverScreen = document.createElement('div');
 gameOverScreen.id = 'game-over';
 gameOverScreen.innerHTML = `
   <div class="game-over-content">
-    <h2>Vous avez eliminé la mauvaise cible !</h2>
+    <h2 id="game-over-reason">Vous avez eliminé la mauvaise cible !</h2>
     <p>Score final: <span id="final-score">0</span></p>
     <p>Meilleur score: <span id="best-score">0</span></p>
     <p><i>Redémarrage dans 5 secondes...</i></p>
@@ -76,6 +106,9 @@ let score = 0;
 let isGameOver = false;
 let isGameStarted = false;
 let canShoot = true;
+let timeRemaining = 30.0;
+let currentTargetTimer = 30.0;
+let gameOverReason = '';
 
 const camera = new PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.1, 1000)
 
@@ -146,6 +179,81 @@ const decalMaterial = new MeshBasicMaterial({
 });
 const decalGeometry = new CircleGeometry(0.5, 16);
 
+// Ajouter cette variable pour l'audio context et l'interface pour WebKit
+interface WindowWithWebkitAudio extends Window {
+  webkitAudioContext?: typeof AudioContext;
+}
+
+let audioContext: AudioContext | null = null;
+let audioSources = new Map<string, MediaElementAudioSourceNode>();
+
+function playAudioWithFade(audioElement: HTMLAudioElement, fadeInDuration: number, fadeOutStart: number, duration: number) {
+  try {
+    // Créer ou réutiliser l'AudioContext
+    if (!audioContext) {
+      const windowWithWebkit = window as WindowWithWebkitAudio;
+      const AudioContextClass = window.AudioContext || windowWithWebkit.webkitAudioContext;
+      if (AudioContextClass) {
+        audioContext = new AudioContextClass();
+      } else {
+        console.warn("AudioContext non supporté par le navigateur.");
+        audioElement.currentTime = 0;
+        audioElement.play();
+        return;
+      }
+    }
+    
+    // Réveiller l'AudioContext si nécessaire
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    
+    // Créer ou réutiliser la source
+    let source: MediaElementAudioSourceNode;
+    if (audioSources.has(audioElement.id)) {
+      source = audioSources.get(audioElement.id)!;
+    } else {
+      source = audioContext.createMediaElementSource(audioElement);
+      audioSources.set(audioElement.id, source);
+    }
+    
+    // Créer un GainNode pour le contrôle du volume
+    const gainNode = audioContext.createGain();
+    
+    // Connecter les nœuds
+    source.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Réinitialiser le son
+    audioElement.currentTime = 0;
+    
+    // Démarrer avec volume à 0
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    
+    // Jouer le son
+    audioElement.play();
+    
+    // Fade in
+    gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + fadeInDuration);
+    
+    // Fade out
+    const fadeOutStartTime = audioContext.currentTime + fadeOutStart;
+    const fadeOutEndTime = audioContext.currentTime + duration;
+    gainNode.gain.setValueAtTime(1, fadeOutStartTime);
+    gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
+    
+    // Déconnecter le gainNode après la fin
+    setTimeout(() => {
+      gainNode.disconnect();
+    }, (duration + 0.5) * 1000);
+  } catch (error) {
+    console.error("Erreur lors de la lecture avec fondu:", error);
+    // Fallback en cas d'erreur
+    audioElement.currentTime = 0;
+    audioElement.play();
+  }
+}
+
 function createExplosion(position: Vector3) {
   const numParticles = 30;
   for (let i = 0; i < numParticles; i++) {
@@ -181,12 +289,23 @@ function updateScore(points: number) {
   scoreDisplay.innerHTML = `Score: ${score}`;
 }
 
-function gameOver() {
+function gameOver(reason = 'time') {
   isGameOver = true;
   isGameStarted = false;
   controls.unlock();
   console.log('Game Over - Controls unlocked. pointerLockElement:', document.pointerLockElement);
+  
+  gameOverReason = reason;
+  const gameOverReasonElement = document.getElementById('game-over-reason');
+  if (gameOverReasonElement) {
+    if (reason === 'time') {
+      gameOverReasonElement.textContent = "Vous n'avez pas réussi la mission !";
+    } else {
+      gameOverReasonElement.textContent = "Vous avez eliminé la mauvaise cible !";
+    }
+  }
 
+  // Préparer l'écran de game over
   const finalScoreElement = document.getElementById('final-score');
   if (finalScoreElement) {
     finalScoreElement.textContent = score.toString();
@@ -201,12 +320,88 @@ function gameOver() {
     bestScoreElement.textContent = localStorage.getItem('bestScore') || '0';
   }
 
-  gameOverScreen.style.display = 'flex';
-
-  console.log('Game Over: Reloading in 5 seconds...');
-  setTimeout(() => {
-    location.reload();
-  }, 5000);
+  // Précharger le son AVANT d'afficher l'écran
+  const laughSfx = document.getElementById('laugh-sfx') as HTMLAudioElement;
+  if (laughSfx) {
+    // Forcer le chargement
+    laughSfx.load();
+    laughSfx.currentTime = 0;
+    laughSfx.volume = 1;
+    
+    // S'assurer que le son est prêt
+    laughSfx.oncanplaythrough = () => {
+      // Afficher l'écran et jouer le son SIMULTANÉMENT
+      gameOverScreen.style.display = 'flex';
+      laughSfx.play();
+      
+      // Appliquer le fade-out uniquement à la fin
+      if (audioContext) {
+        try {
+          // Réveiller l'AudioContext si nécessaire
+          if (audioContext.state === 'suspended') {
+            audioContext.resume();
+          }
+          
+          // Créer ou réutiliser la source
+          let source: MediaElementAudioSourceNode;
+          if (audioSources.has(laughSfx.id)) {
+            source = audioSources.get(laughSfx.id)!;
+          } else {
+            source = audioContext.createMediaElementSource(laughSfx);
+            audioSources.set(laughSfx.id, source);
+          }
+          
+          // Créer un GainNode pour le contrôle du volume
+          const gainNode = audioContext.createGain();
+          
+          // Connecter les nœuds
+          source.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          // Aucun fade-in, commencer directement à volume normal
+          gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+          
+          // Fade-out uniquement sur les 0.3 dernières secondes
+          const gameOverDuration = 5.0; // 5 secondes d'affichage
+          const fadeOutStartTime = audioContext.currentTime + (gameOverDuration - 0.3);
+          const fadeOutEndTime = audioContext.currentTime + gameOverDuration;
+          
+          gainNode.gain.setValueAtTime(1, fadeOutStartTime);
+          gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
+          
+          // Déconnecter le gainNode après la fin
+          setTimeout(() => {
+            gainNode.disconnect();
+          }, gameOverDuration * 1000 + 100);
+        } catch (error) {
+          console.error("Erreur lors du contrôle du volume:", error);
+        }
+      }
+      
+      // Programmer le redémarrage
+      console.log('Game Over: Reloading in 5 seconds...');
+      setTimeout(() => {
+        location.reload();
+      }, 5000);
+    };
+    
+    // En cas d'erreur de chargement, on continue quand même
+    laughSfx.onerror = () => {
+      console.warn("Erreur de chargement du son de rire");
+      gameOverScreen.style.display = 'flex';
+      console.log('Game Over: Reloading in 5 seconds...');
+      setTimeout(() => {
+        location.reload();
+      }, 5000);
+    };
+  } else {
+    // Si pas de son, afficher quand même l'écran
+    gameOverScreen.style.display = 'flex';
+    console.log('Game Over: Reloading in 5 seconds...');
+    setTimeout(() => {
+      location.reload();
+    }, 5000);
+  }
 }
 
 window.addEventListener('mousedown', (event) => {
@@ -237,7 +432,7 @@ window.addEventListener('mousedown', (event) => {
       }
 
       if (hitTarget) {
-        handleTargetHit(
+        importedHandleTargetHit(
           hitTarget,
           scene,
           createExplosion,
@@ -245,7 +440,8 @@ window.addEventListener('mousedown', (event) => {
           gameOver,
           () => {
             if (!isGameOver) {
-              checkAndSpawnTarget(scene);
+              resetTimer();
+              importedCheckAndSpawnTarget(scene);
             }
           }
         );
@@ -266,6 +462,10 @@ window.addEventListener('mousedown', (event) => {
     if (sniperPovImage) sniperPovImage.style.display = 'block';
     if (objectiveDisplay) objectiveDisplay.style.display = 'block';
     instructions.style.display = 'block';
+    
+    timeRemaining = 30.0;
+    timerDisplay.innerHTML = timeRemaining.toFixed(1);
+    
     controls.lock();
   } else if (isGameOver) {
     console.log('CLICK Mousedown - Game is OVER, ignoring lock attempt.');
@@ -284,6 +484,27 @@ function animate(_time: number) {
   stats.begin();
 
   const delta = clock.getDelta()
+
+  if (isGameStarted && !isGameOver) {
+    timeRemaining -= delta;
+    
+    if (timeRemaining <= 0) {
+      timeRemaining = 0;
+      gameOver('time');
+    } else {
+      // Update timer display
+      timerDisplay.innerHTML = timeRemaining.toFixed(1);
+      
+      // Visual warning when time is running low
+      if (timeRemaining <= 5) {
+        timerDisplay.classList.add('danger');
+        timerDisplay.classList.remove('warning');
+      } else if (timeRemaining <= 10) {
+        timerDisplay.classList.add('warning');
+        timerDisplay.classList.remove('danger');
+      }
+    }
+  }
 
   if (commandState.isAiming) {
     document.body.classList.add('aiming');
@@ -384,34 +605,46 @@ parkPlane.receiveShadow = true
 scene.add(parkPlane)
 
 export const vegetation: Mesh[] = [];
-const bushGeometry = new SphereGeometry(0.6, 16, 8);
-const treeTrunkGeometry = new BoxGeometry(0.4, 1.5, 0.4);
-const treeLeavesGeometry = new SphereGeometry(1.2, 16, 8);
+const bushGeometry = new SphereGeometry(1.0, 16, 12);
+const treeTrunkGeometry = new CylinderGeometry(0.4, 0.5, 3.0, 12);
+const treeLeavesGeometry = new SphereGeometry(2.5, 16, 12);
 
-const bushMaterial = new MeshStandardMaterial({ color: 0x228B22 });
-const treeTrunkMaterial = new MeshStandardMaterial({ color: 0x8B4513 });
-const treeLeavesMaterial = new MeshStandardMaterial({ color: 0x556B2F });
+const bushMaterial = new MeshStandardMaterial({ 
+  map: bushTexture,
+  roughness: 0.8,
+  metalness: 0.2
+});
+const treeTrunkMaterial = new MeshStandardMaterial({ 
+  map: willowTexture,
+  roughness: 0.9,
+  metalness: 0.1
+});
+const treeLeavesMaterial = new MeshStandardMaterial({ 
+  map: leafTexture,
+  roughness: 0.7,
+  metalness: 0.0
+});
 
-const vegetationDensity = 0.03;
+const vegetationDensity = 0.007;
 const vegetationArea = parkSize * parkSize;
 const numVegetationItems = Math.floor(vegetationArea * vegetationDensity);
 const vegetationPlacementMargin = 2;
 const parkPlacementArea = parkSize - vegetationPlacementMargin * 2;
 
 for (let i = 0; i < numVegetationItems; i++) {
-  const isTree = Math.random() > 0.5;
+  const isTree = Math.random() > 0.25;
   const x = (Math.random() - 0.5) * parkPlacementArea;
   const z = (Math.random() - 0.5) * parkPlacementArea;
 
   if (isTree) {
     const treeGroup = new Group();
     const trunk = new Mesh(treeTrunkGeometry, treeTrunkMaterial);
-    trunk.position.y = 1.5 / 2;
+    trunk.position.y = 3.0 / 2;
     trunk.castShadow = true;
     treeGroup.add(trunk);
 
     const leaves = new Mesh(treeLeavesGeometry, treeLeavesMaterial);
-    leaves.position.y = 1.5 + 0.8;
+    leaves.position.y = 3.0 + 1.5;
     leaves.castShadow = true;
     treeGroup.add(leaves);
 
@@ -421,7 +654,7 @@ for (let i = 0; i < numVegetationItems; i++) {
 
   } else {
     const bush = new Mesh(bushGeometry, bushMaterial);
-    bush.position.set(x, 0.6, z);
+    bush.position.set(x, 1.0, z);
     bush.castShadow = true;
     scene.add(bush);
     vegetation.push(bush);
@@ -475,3 +708,38 @@ sunLight.shadow.camera.top = shadowCamSize
 sunLight.shadow.camera.bottom = -shadowCamSize
 scene.add(sunLight)
 scene.add(sunLight.target)
+
+// Add CSS styles for the timer
+document.head.insertAdjacentHTML('beforeend', `
+  <style>
+    #timer-display {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 100;
+    }
+    
+    #timer-display.warning {
+      color: #ff9900;
+    }
+    
+    #timer-display.danger {
+      color: #ff0000;
+    }
+  </style>
+`);
+
+function resetTimer() {
+  currentTargetTimer = 30.0 + timeRemaining;
+  timeRemaining = currentTargetTimer;
+  timerDisplay.innerHTML = timeRemaining.toFixed(1);
+  timerDisplay.classList.remove('warning', 'danger');
+}
