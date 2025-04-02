@@ -280,8 +280,7 @@ window.addEventListener('resize', () => {
 
 const clock = new Clock()
 
-function animate() {
-  requestAnimationFrame(animate)
+function animate(_time: number) {
   stats.begin();
 
   const delta = clock.getDelta()
@@ -335,7 +334,7 @@ function animate() {
   stats.end();
 }
 
-animate()
+renderer.setAnimationLoop(animate);
 
 const concreteMaterial = new MeshStandardMaterial({ map: concreteTexture });
 const buildingSideMaterial = new MeshStandardMaterial({ color: 0xaaaaaa });
