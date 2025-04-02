@@ -1,7 +1,7 @@
 import {
-    Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene, CylinderGeometry
+    Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene, CylinderGeometry, MathUtils, MeshBasicMaterial
 } from 'three';
-import { Target } from './interfaces';
+import { Target, TargetLimbs } from './interfaces';
 import {
     targetIdentities, parkSpawnArea, minSpawnDist, targetSpeed, parkSize, numberOfTargets
 } from './constants';
@@ -26,7 +26,7 @@ const vestPanelFrontBackGeometry = new BoxGeometry(0.85, 1.3, 0.05);
 const vestPanelSideGeometry = new BoxGeometry(0.05, 1.3, 0.45);
 
 // Better defined shoes
-const shoeGeometry = new BoxGeometry(0.5, 0.2, 0.7); // Longer in z-direction for better shoe appearance
+const shoeGeometry = new BoxGeometry(0.45, 0.25, 0.8); // Augmenté la longueur pour qu'elles dépassent plus vers l'avant
 
 // Pants
 const pantLegGeometry = new BoxGeometry(0.45, 0.8, 0.45);
@@ -36,6 +36,105 @@ const hatMaterial = new MeshStandardMaterial({ color: 0x000000, name: 'hat' });
 const vestMaterial = new MeshStandardMaterial({ color: 0x0000cc, name: 'vest' });
 const shoeMaterial = new MeshStandardMaterial({ color: 0x00aa00, name: 'shoes' });
 const pantsMaterial = new MeshStandardMaterial({ color: 0x0033aa, name: 'pants' }); // Blue pants
+const eyeMaterial = new MeshBasicMaterial({ color: 0x000000 }); // Black for eyes
+const mouthMaterial = new MeshBasicMaterial({ color: 0x000000 }); // Black for mouth
+
+// Géométries pour les visages
+const eyeGeometry = new BoxGeometry(0.1, 0.1, 0.05);
+const wideEyeGeometry = new BoxGeometry(0.15, 0.1, 0.05);
+const mouthGeometry = new BoxGeometry(0.3, 0.08, 0.05);
+const smileMouthGeometry = new BoxGeometry(0.3, 0.05, 0.05);
+
+// Fonction pour ajouter un visage aléatoire
+function addRandomFace(head: Mesh): void {
+    const faceType = Math.floor(Math.random() * 4); // 4 types de visages
+    
+    // Positionnement sur la face avant (z positif)
+    const faceZ = 0.4;
+    
+    switch(faceType) {
+        case 0: // Visage standard
+            // Yeux
+            const leftEye = new Mesh(eyeGeometry, eyeMaterial);
+            leftEye.position.set(-0.2, 0.1, faceZ);
+            head.add(leftEye);
+            
+            const rightEye = new Mesh(eyeGeometry, eyeMaterial);
+            rightEye.position.set(0.2, 0.1, faceZ);
+            head.add(rightEye);
+            
+            // Bouche
+            const mouth = new Mesh(mouthGeometry, mouthMaterial);
+            mouth.position.set(0, -0.2, faceZ);
+            head.add(mouth);
+            break;
+            
+        case 1: // Visage souriant
+            // Yeux
+            const leftEye1 = new Mesh(eyeGeometry, eyeMaterial);
+            leftEye1.position.set(-0.2, 0.1, faceZ);
+            head.add(leftEye1);
+            
+            const rightEye1 = new Mesh(eyeGeometry, eyeMaterial);
+            rightEye1.position.set(0.2, 0.1, faceZ);
+            head.add(rightEye1);
+            
+            // Bouche souriante (deux parties)
+            const smileMouth = new Mesh(smileMouthGeometry, mouthMaterial);
+            smileMouth.position.set(0, -0.2, faceZ);
+            head.add(smileMouth);
+            
+            const smileLeft = new Mesh(eyeGeometry, mouthMaterial);
+            smileLeft.position.set(-0.2, -0.15, faceZ);
+            head.add(smileLeft);
+            
+            const smileRight = new Mesh(eyeGeometry, mouthMaterial);
+            smileRight.position.set(0.2, -0.15, faceZ);
+            head.add(smileRight);
+            break;
+            
+        case 2: // Visage surpris
+            // Yeux ronds
+            const leftEye2 = new Mesh(wideEyeGeometry, eyeMaterial);
+            leftEye2.position.set(-0.2, 0.1, faceZ);
+            head.add(leftEye2);
+            
+            const rightEye2 = new Mesh(wideEyeGeometry, eyeMaterial);
+            rightEye2.position.set(0.2, 0.1, faceZ);
+            head.add(rightEye2);
+            
+            // Bouche ronde
+            const surpriseMouth = new Mesh(eyeGeometry, mouthMaterial);
+            surpriseMouth.scale.set(1.5, 1.5, 1);
+            surpriseMouth.position.set(0, -0.2, faceZ);
+            head.add(surpriseMouth);
+            break;
+            
+        case 3: // Visage grognon
+            // Yeux
+            const leftEye3 = new Mesh(eyeGeometry, eyeMaterial);
+            leftEye3.position.set(-0.2, 0.1, faceZ);
+            head.add(leftEye3);
+            
+            const rightEye3 = new Mesh(eyeGeometry, eyeMaterial);
+            rightEye3.position.set(0.2, 0.1, faceZ);
+            head.add(rightEye3);
+            
+            // Bouche inversée
+            const frownMouth = new Mesh(smileMouthGeometry, mouthMaterial);
+            frownMouth.position.set(0, -0.25, faceZ);
+            head.add(frownMouth);
+            
+            const frownLeft = new Mesh(eyeGeometry, mouthMaterial);
+            frownLeft.position.set(-0.2, -0.3, faceZ);
+            head.add(frownLeft);
+            
+            const frownRight = new Mesh(eyeGeometry, mouthMaterial);
+            frownRight.position.set(0.2, -0.3, faceZ);
+            head.add(frownRight);
+            break;
+    }
+}
 
 function spawnTarget(scene: Scene): Target | null {
     const availableIds = targetIdentities.filter(identity => !activeTargetIds.has(identity.id));
@@ -59,6 +158,10 @@ function spawnTarget(scene: Scene): Target | null {
     const head = new Mesh(headGeometry, baseMaterial.clone());
     head.position.y = 1.6;
     head.userData = { isTargetBase: true };
+    
+    // Ajouter un visage aléatoire
+    addRandomFace(head);
+    
     targetGroup.add(head);
     
     // Body
@@ -66,25 +169,37 @@ function spawnTarget(scene: Scene): Target | null {
     body.position.y = 0.6;
     targetGroup.add(body);
     
-    // Left arm
+    // Left arm - mettre dans un groupe pour l'animation
+    const leftArmGroup = new Group();
+    leftArmGroup.position.set(-0.6, 1.2, 0);
     const leftArm = new Mesh(armGeometry, baseMaterial.clone());
-    leftArm.position.set(-0.6, 0.6, 0);
-    targetGroup.add(leftArm);
+    leftArm.position.y = -0.6; // Centrer sur le groupe pour la rotation
+    leftArmGroup.add(leftArm);
+    targetGroup.add(leftArmGroup);
     
-    // Right arm
+    // Right arm - mettre dans un groupe pour l'animation
+    const rightArmGroup = new Group();
+    rightArmGroup.position.set(0.6, 1.2, 0);
     const rightArm = new Mesh(armGeometry, baseMaterial.clone());
-    rightArm.position.set(0.6, 0.6, 0);
-    targetGroup.add(rightArm);
+    rightArm.position.y = -0.6; // Centrer sur le groupe pour la rotation
+    rightArmGroup.add(rightArm);
+    targetGroup.add(rightArmGroup);
     
-    // Left leg
+    // Left leg - mettre dans un groupe pour l'animation
+    const leftLegGroup = new Group();
+    leftLegGroup.position.set(-0.2, 0, 0);
     const leftLeg = new Mesh(legGeometry, baseMaterial.clone());
-    leftLeg.position.set(-0.2, -0.3, 0);
-    targetGroup.add(leftLeg);
+    leftLeg.position.y = -0.3; // Centrer sur le groupe pour la rotation
+    leftLegGroup.add(leftLeg);
+    targetGroup.add(leftLegGroup);
     
-    // Right leg
+    // Right leg - mettre dans un groupe pour l'animation
+    const rightLegGroup = new Group();
+    rightLegGroup.position.set(0.2, 0, 0);
     const rightLeg = new Mesh(legGeometry, baseMaterial.clone());
-    rightLeg.position.set(0.2, -0.3, 0);
-    targetGroup.add(rightLeg);
+    rightLeg.position.y = -0.3; // Centrer sur le groupe pour la rotation
+    rightLegGroup.add(rightLeg);
+    targetGroup.add(rightLegGroup);
 
     // Add accessories based on identity
     if (selectedIdentity.hasHat) {
@@ -122,27 +237,27 @@ function spawnTarget(scene: Scene): Target | null {
     
     // Add pants (only if the target is supposed to have pants)
     if (selectedIdentity.hasPants) {
-        // Left pant leg
+        // Left pant leg - ajuster la position pour suivre le leftLegGroup
         const leftPant = new Mesh(pantLegGeometry, pantsMaterial.clone());
-        leftPant.position.set(-0.2, -0.3, 0);
-        targetGroup.add(leftPant);
+        leftPant.position.copy(leftLeg.position);
+        leftLegGroup.add(leftPant);
         
-        // Right pant leg
+        // Right pant leg - ajuster la position pour suivre le rightLegGroup
         const rightPant = new Mesh(pantLegGeometry, pantsMaterial.clone());
-        rightPant.position.set(0.2, -0.3, 0);
-        targetGroup.add(rightPant);
+        rightPant.position.copy(rightLeg.position);
+        rightLegGroup.add(rightPant);
     }
     
     if (selectedIdentity.hasShoes) {
         // Left shoe - improved to look more like actual shoes
         const leftShoe = new Mesh(shoeGeometry, shoeMaterial.clone());
-        leftShoe.position.set(-0.2, -0.7, 0.05); // Moved slightly forward
-        targetGroup.add(leftShoe);
+        leftShoe.position.set(0, -0.6, 0.25); // Augmenté le décalage vers l'avant
+        leftLegGroup.add(leftShoe);
         
         // Right shoe
         const rightShoe = new Mesh(shoeGeometry, shoeMaterial.clone());
-        rightShoe.position.set(0.2, -0.7, 0.05); // Moved slightly forward
-        targetGroup.add(rightShoe);
+        rightShoe.position.set(0, -0.6, 0.25); // Augmenté le décalage vers l'avant
+        rightLegGroup.add(rightShoe);
     }
 
     let x, z;
@@ -163,12 +278,22 @@ function spawnTarget(scene: Scene): Target | null {
 
     scene.add(targetGroup);
 
+    // Sauvegarder les références aux membres pour l'animation
+    const limbs: TargetLimbs = {
+        leftArm: leftArmGroup,
+        rightArm: rightArmGroup,
+        leftLeg: leftLegGroup,
+        rightLeg: rightLegGroup,
+        animationPhase: Math.random() * Math.PI * 2 // Phase aléatoire pour éviter que tous les personnages marchent en synchronisation
+    };
+
     const newTarget: Target = {
         mesh: targetGroup,
         velocity,
         targetPosition: null,
         identity: selectedIdentity,
-        isDesignatedTarget: false
+        isDesignatedTarget: false,
+        limbs // Ajouter les membres à la cible
     };
     targets.push(newTarget);
 
@@ -230,8 +355,35 @@ export function updateTargets(delta: number): void {
             direction.normalize();
             target.velocity.copy(direction).multiplyScalar(targetSpeed);
             target.mesh.lookAt(currentPosition.clone().add(direction));
+            
+            // Animation de marche
+            if (target.limbs) {
+                const speed = target.velocity.length();
+                const walkSpeedFactor = speed / targetSpeed; // Facteur de vitesse normalisé
+                
+                // Mettre à jour la phase d'animation
+                target.limbs.animationPhase += delta * 10 * walkSpeedFactor;
+                
+                // Appliquer les rotations des membres
+                const swingAmplitude = Math.PI / 8; // ~22.5 degrés
+                const swingFactor = Math.sin(target.limbs.animationPhase) * swingAmplitude;
+                
+                // Bras et jambes opposés pour un mouvement naturel
+                target.limbs.leftArm.rotation.x = -swingFactor;
+                target.limbs.rightArm.rotation.x = swingFactor;
+                target.limbs.leftLeg.rotation.x = swingFactor;
+                target.limbs.rightLeg.rotation.x = -swingFactor;
+            }
         } else {
             target.velocity.set(0, 0, 0);
+            
+            // Réinitialiser les rotations en position immobile
+            if (target.limbs) {
+                target.limbs.leftArm.rotation.x = 0;
+                target.limbs.rightArm.rotation.x = 0;
+                target.limbs.leftLeg.rotation.x = 0;
+                target.limbs.rightLeg.rotation.x = 0;
+            }
         }
 
         target.mesh.position.addScaledVector(target.velocity, delta);
@@ -239,7 +391,6 @@ export function updateTargets(delta: number): void {
         target.mesh.position.x = Math.max(-parkBoundary, Math.min(parkBoundary, target.mesh.position.x));
 
         target.mesh.position.z = Math.max(-parkBoundary, Math.min(parkBoundary, target.mesh.position.z));
-
     }
 }
 
