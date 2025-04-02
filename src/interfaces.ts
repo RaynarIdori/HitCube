@@ -13,6 +13,7 @@ export interface TargetIdentity {
 export interface Target {
     mesh: Group;
     velocity: Vector3;
+    targetPosition: Vector3 | null;
     identity: TargetIdentity;
     isDesignatedTarget: boolean;
 }

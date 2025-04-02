@@ -86,6 +86,7 @@ function spawnTarget(scene: Scene): Target | null {
     const newTarget: Target = {
         mesh: targetGroup,
         velocity,
+        targetPosition: null,
         identity: selectedIdentity,
         isDesignatedTarget: false
     };
@@ -130,19 +131,33 @@ export function initializeTargets(scene: Scene): void {
 
 export function updateTargets(delta: number): void {
     const parkBoundary = parkSize / 2 - 1;
+    const arrivalThresholdSq = 0.5 * 0.5;
+
     for (let i = targets.length - 1; i >= 0; i--) {
         const target = targets[i];
+        const currentPosition = target.mesh.position;
+
+        if (!target.targetPosition || currentPosition.distanceToSquared(target.targetPosition) < arrivalThresholdSq) {
+            const newX = (Math.random() - 0.5) * parkSpawnArea;
+            const newZ = (Math.random() - 0.5) * parkSpawnArea;
+            target.targetPosition = new Vector3(newX, currentPosition.y, newZ);
+        }
+
+        const direction = target.targetPosition.clone().sub(currentPosition);
+        direction.y = 0;
+
+        if (direction.lengthSq() > 0.001) {
+            direction.normalize();
+            target.velocity.copy(direction).multiplyScalar(targetSpeed);
+            target.mesh.lookAt(currentPosition.clone().add(direction));
+        } else {
+            target.velocity.set(0, 0, 0);
+        }
 
         target.mesh.position.addScaledVector(target.velocity, delta);
 
-        if (Math.abs(target.mesh.position.x) > parkBoundary) {
-            target.velocity.x *= -1;
-            target.mesh.position.x = Math.sign(target.mesh.position.x) * parkBoundary;
-        }
-        if (Math.abs(target.mesh.position.z) > parkBoundary) {
-            target.velocity.z *= -1;
-            target.mesh.position.z = Math.sign(target.mesh.position.z) * parkBoundary;
-        }
+        target.mesh.position.x = Math.max(-parkBoundary, Math.min(parkBoundary, target.mesh.position.x));
+        target.mesh.position.z = Math.max(-parkBoundary, Math.min(parkBoundary, target.mesh.position.z));
     }
 }
 

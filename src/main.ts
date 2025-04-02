@@ -32,8 +32,18 @@ import {
 import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture } from './texture-manager';
 import { initializeCommandHandling, CommandState } from './commands';
 import { initializeTargets, updateTargets, getTargets, handleTargetHit, checkAndSpawnTarget } from './target-manager';
+import Stats from 'stats.js';
 
 const scene = new Scene()
+
+const stats = new Stats();
+stats.showPanel(0);
+stats.dom.style.position = 'absolute';
+stats.dom.style.right = '0px';
+stats.dom.style.bottom = '0px';
+stats.dom.style.left = 'auto';
+stats.dom.style.top = 'auto';
+document.body.appendChild(stats.dom);
 
 const scoreDisplay = document.createElement('div');
 scoreDisplay.id = 'score-display';
@@ -67,10 +77,10 @@ let isGameOver = false;
 let isGameStarted = false;
 let canShoot = true;
 
-const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-camera.position.set(0, buildingHeight + playerHeight, 5);
+const camera = new PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.1, 1000)
 
-const renderer = new WebGLRenderer({ antialias: false })
+const renderer = new WebGLRenderer({ antialias: true })
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = PCFShadowMap
@@ -272,6 +282,8 @@ const clock = new Clock()
 
 function animate() {
   requestAnimationFrame(animate)
+  stats.begin();
+
   const delta = clock.getDelta()
 
   if (commandState.isAiming) {
@@ -320,6 +332,7 @@ function animate() {
   }
 
   renderer.render(scene, camera)
+  stats.end();
 }
 
 animate()
@@ -371,6 +384,51 @@ parkPlane.position.y = 0
 parkPlane.receiveShadow = true
 scene.add(parkPlane)
 
+export const vegetation: Mesh[] = [];
+const bushGeometry = new SphereGeometry(0.6, 16, 8);
+const treeTrunkGeometry = new BoxGeometry(0.4, 1.5, 0.4);
+const treeLeavesGeometry = new SphereGeometry(1.2, 16, 8);
+
+const bushMaterial = new MeshStandardMaterial({ color: 0x228B22 });
+const treeTrunkMaterial = new MeshStandardMaterial({ color: 0x8B4513 });
+const treeLeavesMaterial = new MeshStandardMaterial({ color: 0x556B2F });
+
+const vegetationDensity = 0.03;
+const vegetationArea = parkSize * parkSize;
+const numVegetationItems = Math.floor(vegetationArea * vegetationDensity);
+const vegetationPlacementMargin = 2;
+const parkPlacementArea = parkSize - vegetationPlacementMargin * 2;
+
+for (let i = 0; i < numVegetationItems; i++) {
+  const isTree = Math.random() > 0.5;
+  const x = (Math.random() - 0.5) * parkPlacementArea;
+  const z = (Math.random() - 0.5) * parkPlacementArea;
+
+  if (isTree) {
+    const treeGroup = new Group();
+    const trunk = new Mesh(treeTrunkGeometry, treeTrunkMaterial);
+    trunk.position.y = 1.5 / 2;
+    trunk.castShadow = true;
+    treeGroup.add(trunk);
+
+    const leaves = new Mesh(treeLeavesGeometry, treeLeavesMaterial);
+    leaves.position.y = 1.5 + 0.8;
+    leaves.castShadow = true;
+    treeGroup.add(leaves);
+
+    treeGroup.position.set(x, 0, z);
+    scene.add(treeGroup);
+    vegetation.push(trunk);
+
+  } else {
+    const bush = new Mesh(bushGeometry, bushMaterial);
+    bush.position.set(x, 0.6, z);
+    bush.castShadow = true;
+    scene.add(bush);
+    vegetation.push(bush);
+  }
+}
+
 const fenceMaterial = new MeshStandardMaterial({
   map: fenceTexture,
   side: DoubleSide,
@@ -405,11 +463,11 @@ scene.add(fenceRight);
 
 const ambientLight = new AmbientLight(0xffffff, 0.3);
 scene.add(ambientLight)
-const sunLight = new DirectionalLight(0xffffff, 1.0);
-sunLight.position.set(40, 60, 30)
+const sunLight = new DirectionalLight(0xffffff, 2);
+sunLight.position.set(-30, 50, -20);
 sunLight.castShadow = true
-sunLight.shadow.mapSize.width = 1024
-sunLight.shadow.mapSize.height = 1024
+sunLight.shadow.mapSize.width = 4096
+sunLight.shadow.mapSize.height = 4096
 sunLight.shadow.camera.near = 0.5
 sunLight.shadow.camera.far = 500
 sunLight.shadow.camera.left = -shadowCamSize
