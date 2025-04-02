@@ -19,7 +19,8 @@ import {
   MeshBasicMaterial,
   SphereGeometry,
   Clock,
-  CircleGeometry
+  CircleGeometry,
+  CylinderGeometry
 } from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
@@ -29,12 +30,50 @@ import {
   defaultFov, particleLife, particleSpeed,
   playerMoveSpeed, fovLerpFactor, fenceHeight, shadowCamSize
 } from './constants';
-import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture } from './texture-manager';
+import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture } from './texture-manager';
 import { initializeCommandHandling, CommandState } from './commands';
-import { initializeTargets, updateTargets, getTargets, handleTargetHit, checkAndSpawnTarget } from './target-manager';
+import { initializeTargets, updateTargets, getTargets, handleTargetHit as importedHandleTargetHit, checkAndSpawnTarget as importedCheckAndSpawnTarget } from './target-manager';
 import Stats from 'stats.js';
 
 const scene = new Scene()
+
+document.head.insertAdjacentHTML('beforeend', `
+  <style>
+    body, #score-display, #timer-display, #instructions, #objective-display, 
+    #game-over, #start-screen, .scope-line, #sniper-pov,
+    .game-over-content, .start-content, h2, p, span, div {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      cursor: default;
+    }
+    img, canvas {
+      user-drag: none;
+      -webkit-user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+    #timer-display {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 100;
+    }
+    #timer-display.warning { color: #ff9900; }
+    #timer-display.danger { color: #ff0000; }
+  </style>
+`);
 
 const stats = new Stats();
 stats.showPanel(0);
@@ -50,11 +89,16 @@ scoreDisplay.id = 'score-display';
 scoreDisplay.innerHTML = 'Score: 0';
 document.body.appendChild(scoreDisplay);
 
+const timerDisplay = document.createElement('div');
+timerDisplay.id = 'timer-display';
+timerDisplay.innerHTML = '30.0';
+document.body.appendChild(timerDisplay);
+
 const gameOverScreen = document.createElement('div');
 gameOverScreen.id = 'game-over';
 gameOverScreen.innerHTML = `
   <div class="game-over-content">
-    <h2>Vous avez eliminé la mauvaise cible !</h2>
+    <h2 id="game-over-reason">Vous avez eliminé la mauvaise cible !</h2>
     <p>Score final: <span id="final-score">0</span></p>
     <p>Meilleur score: <span id="best-score">0</span></p>
     <p><i>Redémarrage dans 5 secondes...</i></p>
@@ -76,9 +120,10 @@ let score = 0;
 let isGameOver = false;
 let isGameStarted = false;
 let canShoot = true;
+let timeRemaining = 30.0;
+let currentTargetTimer = 30.0;
 
 const camera = new PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.1, 1000)
-
 const renderer = new WebGLRenderer({ antialias: true })
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -92,7 +137,6 @@ rgbeLoader.load('sky.hdr', (texture) => {
   texture.mapping = EquirectangularReflectionMapping;
   scene.background = texture;
   scene.environment = texture;
-  console.log('Skybox HDR chargée.');
 }, undefined, (error) => {
   console.error('Erreur chargement skybox HDR :', error);
 });
@@ -124,12 +168,10 @@ camera.fov = defaultFov;
 camera.updateProjectionMatrix();
 
 controls.addEventListener('lock', () => {
-  console.log('Pointer LOCKED');
   document.body.classList.add('pointer-locked');
 });
 
 controls.addEventListener('unlock', () => {
-  console.log('Pointer UNLOCKED');
   document.body.classList.remove('pointer-locked');
 });
 
@@ -145,6 +187,9 @@ const decalMaterial = new MeshBasicMaterial({
   depthWrite: false
 });
 const decalGeometry = new CircleGeometry(0.5, 16);
+
+let audioContext: AudioContext | null = null;
+let audioSources = new Map<string, MediaElementAudioSourceNode>();
 
 function createExplosion(position: Vector3) {
   const numParticles = 30;
@@ -163,6 +208,7 @@ function createExplosion(position: Vector3) {
     explosionParticles.push({
       mesh: particleMesh,
       velocity: velocity,
+      timeCreated: Date.now(),
       life: life,
       initialLife: life
     });
@@ -181,11 +227,17 @@ function updateScore(points: number) {
   scoreDisplay.innerHTML = `Score: ${score}`;
 }
 
-function gameOver() {
+function gameOver(reason = 'time') {
   isGameOver = true;
   isGameStarted = false;
   controls.unlock();
-  console.log('Game Over - Controls unlocked. pointerLockElement:', document.pointerLockElement);
+
+  const gameOverReasonElement = document.getElementById('game-over-reason');
+  if (gameOverReasonElement) {
+    gameOverReasonElement.textContent = reason === 'time'
+      ? "Vous n'avez pas réussi la mission !"
+      : "Vous avez eliminé la mauvaise cible !";
+  }
 
   const finalScoreElement = document.getElementById('final-score');
   if (finalScoreElement) {
@@ -196,6 +248,7 @@ function gameOver() {
   if (score > bestScore) {
     localStorage.setItem('bestScore', score.toString());
   }
+
   const bestScoreElement = document.getElementById('best-score');
   if (bestScoreElement) {
     bestScoreElement.textContent = localStorage.getItem('bestScore') || '0';
@@ -203,7 +256,47 @@ function gameOver() {
 
   gameOverScreen.style.display = 'flex';
 
-  console.log('Game Over: Reloading in 5 seconds...');
+  const laughSfx = document.getElementById('laugh-sfx') as HTMLAudioElement;
+  if (laughSfx) {
+    laughSfx.currentTime = 0;
+    laughSfx.volume = 1;
+    laughSfx.play();
+
+    if (audioContext) {
+      try {
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        let source: MediaElementAudioSourceNode;
+        if (audioSources.has(laughSfx.id)) {
+          source = audioSources.get(laughSfx.id)!;
+        } else {
+          source = audioContext.createMediaElementSource(laughSfx);
+          audioSources.set(laughSfx.id, source);
+        }
+
+        const gainNode = audioContext.createGain();
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+
+        const gameOverDuration = 5.0;
+        const fadeOutStartTime = audioContext.currentTime + (gameOverDuration - 0.3);
+        const fadeOutEndTime = audioContext.currentTime + gameOverDuration;
+
+        gainNode.gain.setValueAtTime(1, fadeOutStartTime);
+        gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
+
+        setTimeout(() => {
+          gainNode.disconnect();
+        }, gameOverDuration * 1000 + 100);
+      } catch (error) {
+        console.error("Erreur lors du contrôle du volume:", error);
+      }
+    }
+  }
+
   setTimeout(() => {
     location.reload();
   }, 5000);
@@ -214,14 +307,13 @@ window.addEventListener('mousedown', (event) => {
     canShoot = false;
     const shotSfx = document.getElementById('shot-sfx') as HTMLAudioElement;
     if (shotSfx) {
-        shotSfx.currentTime = 0;
-        shotSfx.play();
-        shotSfx.onended = () => {
-            canShoot = true;
-        };
+      shotSfx.currentTime = 0;
+      shotSfx.play();
+      shotSfx.onended = () => {
+        canShoot = true;
+      };
     }
 
-    console.log('FIRE Mousedown - Aiming:', commandState.isAiming, 'Locked:', controls.isLocked);
     event.preventDefault();
     mouse.x = 0; mouse.y = 0;
     raycaster.setFromCamera(mouse, camera);
@@ -237,7 +329,7 @@ window.addEventListener('mousedown', (event) => {
       }
 
       if (hitTarget) {
-        handleTargetHit(
+        importedHandleTargetHit(
           hitTarget,
           scene,
           createExplosion,
@@ -245,19 +337,16 @@ window.addEventListener('mousedown', (event) => {
           gameOver,
           () => {
             if (!isGameOver) {
-              checkAndSpawnTarget(scene);
+              resetTimer();
+              importedCheckAndSpawnTarget(scene);
             }
           }
         );
-      } else {
-        console.log("Intersection detected, but failed to associate with a known target group.", hitObject);
       }
     }
   } else if (event.button === 0 && !controls.isLocked && isGameStarted && !isGameOver) {
-    console.log('CLICK Mousedown - Game Active, Not Locked -> Attempt Lock');
     controls.lock();
   } else if (event.button === 0 && !isGameStarted) {
-    console.log('CLICK Mousedown - Starting Game');
     isGameStarted = true;
     startScreen.style.display = 'none';
     document.body.classList.add('game-active');
@@ -266,9 +355,11 @@ window.addEventListener('mousedown', (event) => {
     if (sniperPovImage) sniperPovImage.style.display = 'block';
     if (objectiveDisplay) objectiveDisplay.style.display = 'block';
     instructions.style.display = 'block';
+
+    timeRemaining = 30.0;
+    timerDisplay.innerHTML = timeRemaining.toFixed(1);
+
     controls.lock();
-  } else if (isGameOver) {
-    console.log('CLICK Mousedown - Game is OVER, ignoring lock attempt.');
   }
 });
 
@@ -284,6 +375,25 @@ function animate(_time: number) {
   stats.begin();
 
   const delta = clock.getDelta()
+
+  if (isGameStarted && !isGameOver) {
+    timeRemaining -= delta;
+
+    if (timeRemaining <= 0) {
+      timeRemaining = 0;
+      gameOver('time');
+    } else {
+      timerDisplay.innerHTML = timeRemaining.toFixed(1);
+
+      if (timeRemaining <= 5) {
+        timerDisplay.classList.add('danger');
+        timerDisplay.classList.remove('warning');
+      } else if (timeRemaining <= 10) {
+        timerDisplay.classList.add('warning');
+        timerDisplay.classList.remove('danger');
+      }
+    }
+  }
 
   if (commandState.isAiming) {
     document.body.classList.add('aiming');
@@ -318,6 +428,9 @@ function animate(_time: number) {
 
   for (let i = explosionParticles.length - 1; i >= 0; i--) {
     const particle = explosionParticles[i];
+
+    if (particle.life === undefined) continue;
+
     particle.life -= delta;
 
     if (particle.life <= 0) {
@@ -326,7 +439,9 @@ function animate(_time: number) {
     } else {
       particle.mesh.position.addScaledVector(particle.velocity, delta);
       particle.velocity.y -= 9.8 * delta * 0.5;
-      (particle.mesh.material as MeshBasicMaterial).opacity = particle.life / particle.initialLife;
+
+      const initialLife = particle.initialLife ?? 1;
+      (particle.mesh.material as MeshBasicMaterial).opacity = particle.life / initialLife;
     }
   }
 
@@ -336,7 +451,7 @@ function animate(_time: number) {
 
 renderer.setAnimationLoop(animate);
 
-const concreteMaterial = new MeshStandardMaterial({ map: concreteTexture });
+const concreteMaterial = new MeshStandardMaterial({ map: concreteTexture() });
 const buildingSideMaterial = new MeshStandardMaterial({ color: 0xaaaaaa });
 
 const buildingMaterials = [
@@ -354,27 +469,32 @@ buildingMesh.position.y = buildingHeight / 2;
 buildingMesh.castShadow = true;
 buildingMesh.receiveShadow = true;
 scene.add(buildingMesh);
-const muretMaterial = new MeshStandardMaterial({ map: brickTexture });
+
+const muretMaterial = new MeshStandardMaterial({ map: brickTexture() });
 const wallZGeo = new BoxGeometry(buildingSize, muretHeight, muretThickness);
 const wallFront = new Mesh(wallZGeo, muretMaterial);
 wallFront.position.set(0, buildingHeight + muretHeight / 2, -buildingSize / 2 + muretThickness / 2);
 wallFront.castShadow = true;
 scene.add(wallFront);
+
 const wallBack = new Mesh(wallZGeo, muretMaterial.clone());
 wallBack.position.set(0, buildingHeight + muretHeight / 2, buildingSize / 2 - muretThickness / 2);
 wallBack.castShadow = true;
 scene.add(wallBack);
+
 const wallXGeo = new BoxGeometry(muretThickness, muretHeight, buildingSize);
 const wallLeft = new Mesh(wallXGeo, muretMaterial.clone());
 wallLeft.position.set(-buildingSize / 2 + muretThickness / 2, buildingHeight + muretHeight / 2, 0);
 wallLeft.castShadow = true;
 scene.add(wallLeft);
+
 const wallRight = new Mesh(wallXGeo, muretMaterial.clone());
 wallRight.position.set(buildingSize / 2 - muretThickness / 2, buildingHeight + muretHeight / 2, 0);
 wallRight.castShadow = true;
 scene.add(wallRight);
+
 const parkGeometry = new PlaneGeometry(parkSize, parkSize);
-const parkMaterial = new MeshStandardMaterial({ map: grassTexture, side: DoubleSide })
+const parkMaterial = new MeshStandardMaterial({ map: grassTexture(), side: DoubleSide })
 parkMaterial.metalness = 0.1
 parkMaterial.roughness = 0.9
 const parkPlane = new Mesh(parkGeometry, parkMaterial)
@@ -384,52 +504,51 @@ parkPlane.receiveShadow = true
 scene.add(parkPlane)
 
 export const vegetation: Mesh[] = [];
-const bushGeometry = new SphereGeometry(0.6, 16, 8);
-const treeTrunkGeometry = new BoxGeometry(0.4, 1.5, 0.4);
-const treeLeavesGeometry = new SphereGeometry(1.2, 16, 8);
+const treeTrunkGeometry = new CylinderGeometry(0.4, 0.5, 3.0, 12);
+const treeLeavesGeometry = new SphereGeometry(2.5, 16, 12);
 
-const bushMaterial = new MeshStandardMaterial({ color: 0x228B22 });
-const treeTrunkMaterial = new MeshStandardMaterial({ color: 0x8B4513 });
-const treeLeavesMaterial = new MeshStandardMaterial({ color: 0x556B2F });
+const treeTrunkMaterial = new MeshStandardMaterial({
+  map: willowTexture(),
+  roughness: 0.9,
+  metalness: 0.1
+});
+const treeLeavesMaterial = new MeshStandardMaterial({
+  map: leafTexture(),
+  roughness: 0.7,
+  metalness: 0.0
+});
 
-const vegetationDensity = 0.03;
+const vegetationDensity = 0.007;
 const vegetationArea = parkSize * parkSize;
 const numVegetationItems = Math.floor(vegetationArea * vegetationDensity);
 const vegetationPlacementMargin = 2;
 const parkPlacementArea = parkSize - vegetationPlacementMargin * 2;
 
 for (let i = 0; i < numVegetationItems; i++) {
-  const isTree = Math.random() > 0.5;
+  const isTree = Math.random() > 0.25;
   const x = (Math.random() - 0.5) * parkPlacementArea;
   const z = (Math.random() - 0.5) * parkPlacementArea;
 
   if (isTree) {
     const treeGroup = new Group();
     const trunk = new Mesh(treeTrunkGeometry, treeTrunkMaterial);
-    trunk.position.y = 1.5 / 2;
+    trunk.position.y = 3.0 / 2;
     trunk.castShadow = true;
     treeGroup.add(trunk);
 
     const leaves = new Mesh(treeLeavesGeometry, treeLeavesMaterial);
-    leaves.position.y = 1.5 + 0.8;
+    leaves.position.y = 3.0 + 1.5;
     leaves.castShadow = true;
     treeGroup.add(leaves);
 
     treeGroup.position.set(x, 0, z);
     scene.add(treeGroup);
     vegetation.push(trunk);
-
-  } else {
-    const bush = new Mesh(bushGeometry, bushMaterial);
-    bush.position.set(x, 0.6, z);
-    bush.castShadow = true;
-    scene.add(bush);
-    vegetation.push(bush);
   }
 }
 
 const fenceMaterial = new MeshStandardMaterial({
-  map: fenceTexture,
+  map: fenceTexture(),
   side: DoubleSide,
   transparent: true,
   alphaTest: 0.1
@@ -475,3 +594,10 @@ sunLight.shadow.camera.top = shadowCamSize
 sunLight.shadow.camera.bottom = -shadowCamSize
 scene.add(sunLight)
 scene.add(sunLight.target)
+
+function resetTimer() {
+  currentTargetTimer = 15 + timeRemaining;
+  timeRemaining = currentTargetTimer;
+  timerDisplay.innerHTML = timeRemaining.toFixed(1);
+  timerDisplay.classList.remove('warning', 'danger');
+}

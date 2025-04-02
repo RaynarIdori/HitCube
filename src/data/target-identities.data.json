@@ -1,272 +1,252 @@
 [
     {
         "id": 1,
-        "name": "Jaune avec Chapeau",
-        "description": "Cible de couleur jaune, se distingue par son chapeau.",
+        "name": "Bob le Bananier",
+        "description": "Cible jaune avec chapeau et pantalon, adore faire des blagues pourries.",
         "baseColorHex": "0xffff00",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": true
     },
     {
         "id": 2,
-        "name": "Cyan avec Gilet",
-        "description": "Cible de couleur cyan, reconnaissable à son gilet.",
+        "name": "Maurice le Marin",
+        "description": "Cible cyan qui porte uniquement un gilet, perdu sans son pantalon.",
         "baseColorHex": "0x00ffff",
         "hasHat": false,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 3,
-        "name": "Magenta avec Chaussures",
-        "description": "Cible de couleur magenta, équipée de chaussures.",
+        "name": "Sandrine Sans-Chapeau",
+        "description": "Cible magenta avec chaussures et pantalon, déteste les couvre-chefs.",
         "baseColorHex": "0xff00ff",
         "hasHat": false,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 4,
-        "name": "Blanc Simple",
-        "description": "Une cible de couleur blanche, sans aucun accessoire.",
+        "name": "Blanco le Nudiste",
+        "description": "Cible blanche qui refuse tout vêtement, même un pantalon.",
         "baseColorHex": "0xffffff",
         "hasHat": false,
         "hasVest": false,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 5,
-        "name": "Gris avec Chapeau et Chaussures",
-        "description": "Cible de couleur grise, portant un chapeau et des chaussures.",
+        "name": "Grisou le Fashion",
+        "description": "Cible grise avec chapeau, chaussures et pantalon, mais refuse les gilets.",
         "baseColorHex": "0x888888",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 6,
-        "name": "Jaune avec Gilet",
-        "description": "Cible de couleur jaune, porte un gilet distinctif.",
+        "name": "Citron le Frileux",
+        "description": "Cible jaune avec gilet uniquement, a oublié son pantalon chez lui.",
         "baseColorHex": "0xffff00",
         "hasHat": false,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 7,
-        "name": "Cyan avec Chaussures",
-        "description": "Cible de couleur cyan, toujours vue avec des chaussures.",
+        "name": "Chausette Bleue",
+        "description": "Cible cyan avec chaussures et pantalon, est allergique aux chapeaux.",
         "baseColorHex": "0x00ffff",
         "hasHat": false,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 8,
-        "name": "Magenta avec Chapeau",
-        "description": "Cible de couleur magenta, identifiable par son chapeau.",
+        "name": "Maggy le Coquin",
+        "description": "Cible magenta avec chapeau, mais sans pantalon ni chaussures.",
         "baseColorHex": "0xff00ff",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 9,
-        "name": "Blanc avec Gilet",
-        "description": "Cible de couleur blanche, complétée par un gilet.",
+        "name": "Neige le Corporate",
+        "description": "Cible blanche avec gilet professionnel et pantalon, mais pieds nus.",
         "baseColorHex": "0xffffff",
         "hasHat": false,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": true
     },
     {
         "id": 10,
-        "name": "Gris Complet",
-        "description": "Cible de couleur grise, entièrement équipée : chapeau, gilet et chaussures.",
+        "name": "Gris-Gris le Complet",
+        "description": "Cible grise hyper équipée avec chapeau, gilet, chaussures et pantalon.",
         "baseColorHex": "0x888888",
         "hasHat": true,
         "hasVest": true,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 11,
-        "name": "Jaune avec Chaussures",
-        "description": "Cible de couleur jaune vif, équipée de chaussures.",
+        "name": "Jaunisse le Danseur",
+        "description": "Cible jaune obsédée par ses chaussures, mais sans pantalon.",
         "baseColorHex": "0xffff00",
         "hasHat": false,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": false
     },
     {
         "id": 12,
-        "name": "Cyan avec Chapeau",
-        "description": "Cible de couleur cyan, arborant un chapeau.",
+        "name": "Turquoise l'Intellectuel",
+        "description": "Cible cyan avec chapeau distingué et pantalon élégant.",
         "baseColorHex": "0x00ffff",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": true
     },
     {
         "id": 13,
-        "name": "Magenta avec Gilet",
-        "description": "Cible de couleur magenta, porte un gilet.",
+        "name": "Fuchsia le Modeste",
+        "description": "Cible magenta avec gilet uniquement, la pudeur ne va pas plus bas.",
         "baseColorHex": "0xff00ff",
         "hasHat": false,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 14,
-        "name": "Blanc avec Chapeau et Chaussures",
-        "description": "Cible de couleur blanche, portant chapeau et chaussures.",
+        "name": "Neigeux le Paradoxe",
+        "description": "Cible blanche qui protège sa tête et ses pieds, et porte un pantalon.",
         "baseColorHex": "0xffffff",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 15,
-        "name": "Gris avec Gilet",
-        "description": "Cible de couleur grise, identifiée par son gilet.",
+        "name": "Grisâtre le Minimaliste",
+        "description": "Cible grise avec gilet uniquement, refuse tout autre accessoire.",
         "baseColorHex": "0x888888",
         "hasHat": false,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 16,
-        "name": "Jaune avec Chapeau et Gilet",
-        "description": "Cible de couleur jaune, porte à la fois un chapeau et un gilet.",
+        "name": "Soleil le Timide",
+        "description": "Cible jaune avec chapeau, gilet et pantalon, mais pas de chaussures.",
         "baseColorHex": "0xffff00",
         "hasHat": true,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": true
     },
     {
         "id": 17,
-        "name": "Cyan avec Gilet et Chaussures",
-        "description": "Cible de couleur cyan, équipée d'un gilet et de chaussures.",
+        "name": "Azur le Pressé",
+        "description": "Cible cyan avec gilet et chaussures, a oublié son pantalon en partant.",
         "baseColorHex": "0x00ffff",
         "hasHat": false,
         "hasVest": true,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": false
     },
     {
         "id": 18,
-        "name": "Magenta avec Chapeau et Chaussures",
-        "description": "Cible de couleur magenta, porte un chapeau et des chaussures.",
+        "name": "Rosâtre le Sensible",
+        "description": "Cible magenta avec chapeau, chaussures et pantalon, mais sans gilet.",
         "baseColorHex": "0xff00ff",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 19,
-        "name": "Blanc avec Chapeau et Gilet",
-        "description": "Cible de couleur blanche, habituellement avec un chapeau et un gilet.",
+        "name": "Blanc-Bec l'Exhibitionniste",
+        "description": "Cible blanche avec chapeau et gilet mais sans pantalon ni chaussures.",
         "baseColorHex": "0xffffff",
         "hasHat": true,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": false
     },
     {
         "id": 20,
-        "name": "Gris avec Chapeau et Gilet",
-        "description": "Cible de couleur grise, connue pour porter un chapeau et un gilet.",
+        "name": "Poivre le Stylé",
+        "description": "Cible grise avec chapeau, gilet et pantalon, mais déteste les chaussures.",
         "baseColorHex": "0x888888",
         "hasHat": true,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": true
     },
     {
         "id": 21,
-        "name": "Magenta Complet",
-        "description": "Cible de couleur magenta, avec chapeau, gilet et chaussures.",
+        "name": "Fuchsia Full Options",
+        "description": "Cible magenta avec tout l'attirail: chapeau, gilet, chaussures et pantalon.",
         "baseColorHex": "0xff00ff",
         "hasHat": true,
         "hasVest": true,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     },
     {
         "id": 22,
-        "name": "Blanc avec Chaussures",
-        "description": "Cible de couleur blanche, identifiable par ses chaussures.",
+        "name": "Blanc-Blanc le Marcheur",
+        "description": "Cible blanche qui porte uniquement des chaussures, sans pantalon.",
         "baseColorHex": "0xffffff",
         "hasHat": false,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": false
     },
     {
         "id": 23,
-        "name": "Cyan avec Chapeau et Gilet",
-        "description": "Cible de couleur cyan, portant un chapeau et un gilet.",
+        "name": "Bleuâtre le Business",
+        "description": "Cible cyan avec chapeau, gilet et pantalon, mais pieds nus par choix.",
         "baseColorHex": "0x00ffff",
         "hasHat": true,
         "hasVest": true,
-        "hasShoes": false
+        "hasShoes": false,
+        "hasPants": true
     },
     {
         "id": 24,
-        "name": "Jaune avec Chapeau et Chaussures",
-        "description": "Cible de couleur jaune, équipée d'un chapeau et de chaussures.",
+        "name": "Banane le Coureur",
+        "description": "Cible jaune avec chapeau et chaussures, mais sans pantalon pour courir plus vite.",
         "baseColorHex": "0xffff00",
         "hasHat": true,
         "hasVest": false,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": false
     },
     {
         "id": 25,
-        "name": "Gris avec Chaussures",
-        "description": "Cible de couleur grise, se distingue par ses chaussures.",
+        "name": "Gris-Gris le Marcheur",
+        "description": "Cible grise avec chaussures et pantalon, mais tête découverte.",
         "baseColorHex": "0x888888",
         "hasHat": false,
         "hasVest": false,
-        "hasShoes": true
-    },
-    {
-        "id": 26,
-        "name": "Blanc avec Gilet et Chaussures",
-        "description": "Cible de couleur blanche, avec un gilet et des chaussures.",
-        "baseColorHex": "0xffffff",
-        "hasHat": false,
-        "hasVest": true,
-        "hasShoes": true
-    },
-    {
-        "id": 27,
-        "name": "Jaune avec Gilet et Chaussures",
-        "description": "Cible de couleur jaune, porte un gilet et des chaussures.",
-        "baseColorHex": "0xffff00",
-        "hasHat": false,
-        "hasVest": true,
-        "hasShoes": true
-    },
-    {
-        "id": 28,
-        "name": "Cyan avec Chapeau et Chaussures",
-        "description": "Cible de couleur cyan, reconnaissable à son chapeau et ses chaussures.",
-        "baseColorHex": "0x00ffff",
-        "hasHat": true,
-        "hasVest": false,
-        "hasShoes": true
-    },
-    {
-        "id": 29,
-        "name": "Magenta avec Gilet et Chaussures",
-        "description": "Cible de couleur magenta, équipée d'un gilet et de chaussures.",
-        "baseColorHex": "0xff00ff",
-        "hasHat": false,
-        "hasVest": true,
-        "hasShoes": true
-    },
-    {
-        "id": 30,
-        "name": "Gris avec Gilet et Chaussures",
-        "description": "Cible de couleur grise, portant un gilet et des chaussures.",
-        "baseColorHex": "0x888888",
-        "hasHat": false,
-        "hasVest": true,
-        "hasShoes": true
+        "hasShoes": true,
+        "hasPants": true
     }
 ]

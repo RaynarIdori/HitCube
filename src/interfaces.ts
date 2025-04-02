@@ -1,4 +1,4 @@
-import { Group, Mesh, Vector3 } from 'three';
+import { Group, Mesh, Vector3, Scene as ThreeScene } from 'three';
 
 export interface TargetIdentity {
     id: number;
@@ -8,6 +8,15 @@ export interface TargetIdentity {
     hasHat: boolean;
     hasVest: boolean;
     hasShoes: boolean;
+    hasPants: boolean;
+}
+
+export interface TargetLimbs {
+    leftArm: Group;
+    rightArm: Group;
+    leftLeg: Group;
+    rightLeg: Group;
+    animationPhase: number;
 }
 
 export interface Target {
@@ -16,11 +25,15 @@ export interface Target {
     targetPosition: Vector3 | null;
     identity: TargetIdentity;
     isDesignatedTarget: boolean;
+    limbs?: TargetLimbs;
 }
 
 export interface ExplosionParticle {
     mesh: Mesh;
     velocity: Vector3;
-    life: number;
-    initialLife: number;
-} 
+    timeCreated: number;
+    life?: number;
+    initialLife?: number;
+}
+
+export type Scene = ThreeScene;
