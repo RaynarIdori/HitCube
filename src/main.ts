@@ -109,7 +109,7 @@ const raycaster = new Raycaster()
 const mouse = new Vector2()
 
 const controls = new PointerLockControls(camera, document.body)
-scene.add(controls.getObject())
+scene.add(controls.object)
 
 let commandState: CommandState;
 commandState = initializeCommandHandling(controls, camera);
