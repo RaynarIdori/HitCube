@@ -31,6 +31,11 @@ export interface Target {
 export interface ExplosionParticle {
     mesh: Mesh;
     velocity: Vector3;
-    life: number;
-    initialLife: number;
-} 
+    timeCreated: number;
+    life?: number;
+    initialLife?: number;
+}
+
+// Add Scene type alias for use with THREE namespace
+import * as THREE from 'three';
+export type Scene = THREE.Scene; 

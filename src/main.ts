@@ -108,7 +108,6 @@ let isGameStarted = false;
 let canShoot = true;
 let timeRemaining = 30.0;
 let currentTargetTimer = 30.0;
-let gameOverReason = '';
 
 const camera = new PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.1, 1000)
 
@@ -179,80 +178,8 @@ const decalMaterial = new MeshBasicMaterial({
 });
 const decalGeometry = new CircleGeometry(0.5, 16);
 
-// Ajouter cette variable pour l'audio context et l'interface pour WebKit
-interface WindowWithWebkitAudio extends Window {
-  webkitAudioContext?: typeof AudioContext;
-}
-
 let audioContext: AudioContext | null = null;
 let audioSources = new Map<string, MediaElementAudioSourceNode>();
-
-function playAudioWithFade(audioElement: HTMLAudioElement, fadeInDuration: number, fadeOutStart: number, duration: number) {
-  try {
-    // Créer ou réutiliser l'AudioContext
-    if (!audioContext) {
-      const windowWithWebkit = window as WindowWithWebkitAudio;
-      const AudioContextClass = window.AudioContext || windowWithWebkit.webkitAudioContext;
-      if (AudioContextClass) {
-        audioContext = new AudioContextClass();
-      } else {
-        console.warn("AudioContext non supporté par le navigateur.");
-        audioElement.currentTime = 0;
-        audioElement.play();
-        return;
-      }
-    }
-    
-    // Réveiller l'AudioContext si nécessaire
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-    
-    // Créer ou réutiliser la source
-    let source: MediaElementAudioSourceNode;
-    if (audioSources.has(audioElement.id)) {
-      source = audioSources.get(audioElement.id)!;
-    } else {
-      source = audioContext.createMediaElementSource(audioElement);
-      audioSources.set(audioElement.id, source);
-    }
-    
-    // Créer un GainNode pour le contrôle du volume
-    const gainNode = audioContext.createGain();
-    
-    // Connecter les nœuds
-    source.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    // Réinitialiser le son
-    audioElement.currentTime = 0;
-    
-    // Démarrer avec volume à 0
-    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-    
-    // Jouer le son
-    audioElement.play();
-    
-    // Fade in
-    gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + fadeInDuration);
-    
-    // Fade out
-    const fadeOutStartTime = audioContext.currentTime + fadeOutStart;
-    const fadeOutEndTime = audioContext.currentTime + duration;
-    gainNode.gain.setValueAtTime(1, fadeOutStartTime);
-    gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
-    
-    // Déconnecter le gainNode après la fin
-    setTimeout(() => {
-      gainNode.disconnect();
-    }, (duration + 0.5) * 1000);
-  } catch (error) {
-    console.error("Erreur lors de la lecture avec fondu:", error);
-    // Fallback en cas d'erreur
-    audioElement.currentTime = 0;
-    audioElement.play();
-  }
-}
 
 function createExplosion(position: Vector3) {
   const numParticles = 30;
@@ -271,6 +198,7 @@ function createExplosion(position: Vector3) {
     explosionParticles.push({
       mesh: particleMesh,
       velocity: velocity,
+      timeCreated: Date.now(),
       life: life,
       initialLife: life
     });
@@ -295,7 +223,7 @@ function gameOver(reason = 'time') {
   controls.unlock();
   console.log('Game Over - Controls unlocked. pointerLockElement:', document.pointerLockElement);
   
-  gameOverReason = reason;
+  // Update the game over reason text
   const gameOverReasonElement = document.getElementById('game-over-reason');
   if (gameOverReasonElement) {
     if (reason === 'time') {
@@ -517,6 +445,10 @@ function animate(_time: number) {
 
   for (let i = explosionParticles.length - 1; i >= 0; i--) {
     const particle = explosionParticles[i];
+    
+    // Handle undefined life properties safely
+    if (particle.life === undefined) continue;
+    
     particle.life -= delta;
 
     if (particle.life <= 0) {
@@ -525,7 +457,10 @@ function animate(_time: number) {
     } else {
       particle.mesh.position.addScaledVector(particle.velocity, delta);
       particle.velocity.y -= 9.8 * delta * 0.5;
-      (particle.mesh.material as MeshBasicMaterial).opacity = particle.life / particle.initialLife;
+      
+      // Handle undefined initialLife property safely
+      const initialLife = particle.initialLife ?? 1;
+      (particle.mesh.material as MeshBasicMaterial).opacity = particle.life / initialLife;
     }
   }
 
@@ -703,7 +638,7 @@ document.head.insertAdjacentHTML('beforeend', `
 `);
 
 function resetTimer() {
-  currentTargetTimer = 30.0 + timeRemaining;
+  currentTargetTimer = 2.5 + timeRemaining;
   timeRemaining = currentTargetTimer;
   timerDisplay.innerHTML = timeRemaining.toFixed(1);
   timerDisplay.classList.remove('warning', 'danger');

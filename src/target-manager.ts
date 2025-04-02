@@ -1,5 +1,5 @@
 import {
-    Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene, CylinderGeometry, MathUtils, MeshBasicMaterial
+    Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene, MeshBasicMaterial
 } from 'three';
 import { Target, TargetLimbs } from './interfaces';
 import {
@@ -9,6 +9,9 @@ import {
 let targets: Target[] = [];
 let activeTargetIds = new Set<number>();
 let designatedTarget: Target | null = null;
+// Keep the kill counter for speed calculations but remove the display element
+let targetsKilled = 0;
+let currentTargetSpeed = targetSpeed;
 
 // Minecraft-style character geometries
 const headGeometry = new BoxGeometry(0.8, 0.8, 0.8);
@@ -307,14 +310,27 @@ function updateObjectiveDisplay(target: Target | null): void {
     const objectiveDisplayElement = document.getElementById('objective-display');
     if (objectiveDisplayElement) {
         if (target) {
+            // List all characteristics including pants status
+            const characteristics = [];
+            if (target.identity.hasHat) characteristics.push("chapeau");
+            if (target.identity.hasVest) characteristics.push("gilet");
+            if (target.identity.hasShoes) characteristics.push("chaussures");
+            if (target.identity.hasPants) characteristics.push("pantalon");
+            
+            const accessoriesText = characteristics.length > 0 
+                ? `avec ${characteristics.join(', ')}` 
+                : "sans accessoires";
+            
             objectiveDisplayElement.innerHTML = `
                 <div class="objective-title">Objectif :</div>
                 <div class="objective-name">${target.identity.name}</div>
                 <div class="objective-desc">${target.identity.description}</div>
+                <div class="objective-accessories">Cible ${accessoriesText}</div>
             `;
             console.log('Objectif de mission :', {
                 name: target.identity.name,
-                description: target.identity.description
+                description: target.identity.description,
+                accessories: accessoriesText
             });
         } else {
             objectiveDisplayElement.innerHTML = `
@@ -353,13 +369,14 @@ export function updateTargets(delta: number): void {
 
         if (direction.lengthSq() > 0.001) {
             direction.normalize();
-            target.velocity.copy(direction).multiplyScalar(targetSpeed);
+            // Use currentTargetSpeed instead of targetSpeed
+            target.velocity.copy(direction).multiplyScalar(currentTargetSpeed);
             target.mesh.lookAt(currentPosition.clone().add(direction));
             
             // Animation de marche
             if (target.limbs) {
                 const speed = target.velocity.length();
-                const walkSpeedFactor = speed / targetSpeed; // Facteur de vitesse normalisé
+                const walkSpeedFactor = speed / currentTargetSpeed; // Facteur de vitesse normalisé
                 
                 // Mettre à jour la phase d'animation
                 target.limbs.animationPhase += delta * 10 * walkSpeedFactor;
@@ -436,6 +453,16 @@ export function handleTargetHit(
     activeTargetIds.delete(hitTarget.identity.id);
     scene.remove(hitTarget.mesh);
     targets.splice(targetIndex, 1);
+    
+    // Update kill counter and increase target speed
+    if (wasDesignated) {
+        targetsKilled++;
+        
+        // Increase target movement speed
+        currentTargetSpeed += 0.5;
+        console.log(`Target speed increased to: ${currentTargetSpeed}`);
+    }
+    
     onTargetRemoved();
 
     if (wasDesignated) {

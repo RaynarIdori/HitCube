@@ -215,6 +215,13 @@ body.scoped #scope-pov {
   color: #bdbdbd;
 }
 
+#objective-display .objective-accessories {
+  font-size: 0.95em;
+  margin-top: 5px;
+  color: #81c784;
+  font-weight: bold;
+}
+
 #objective-display .objective-status {
     font-size: 1.1em;
     font-weight: bold;
@@ -344,3 +351,5 @@ body.aiming #objective-display {
   opacity: 0;
   visibility: hidden;
 }
+
+/* CSS removed for unused kill counter */
