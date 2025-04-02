@@ -30,7 +30,7 @@ import {
   defaultFov, particleLife, particleSpeed,
   playerMoveSpeed, fovLerpFactor, fenceHeight, shadowCamSize
 } from './constants';
-import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture, bushTexture } from './texture-manager';
+import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture } from './texture-manager';
 import { initializeCommandHandling, CommandState } from './commands';
 import { initializeTargets, updateTargets, getTargets, handleTargetHit as importedHandleTargetHit, checkAndSpawnTarget as importedCheckAndSpawnTarget } from './target-manager';
 import Stats from 'stats.js';
@@ -583,15 +583,9 @@ parkPlane.receiveShadow = true
 scene.add(parkPlane)
 
 export const vegetation: Mesh[] = [];
-const bushGeometry = new SphereGeometry(1.0, 16, 12);
 const treeTrunkGeometry = new CylinderGeometry(0.4, 0.5, 3.0, 12);
 const treeLeavesGeometry = new SphereGeometry(2.5, 16, 12);
 
-const bushMaterial = new MeshStandardMaterial({ 
-  map: bushTexture,
-  roughness: 0.8,
-  metalness: 0.2
-});
 const treeTrunkMaterial = new MeshStandardMaterial({ 
   map: willowTexture,
   roughness: 0.9,
@@ -629,13 +623,6 @@ for (let i = 0; i < numVegetationItems; i++) {
     treeGroup.position.set(x, 0, z);
     scene.add(treeGroup);
     vegetation.push(trunk);
-
-  } else {
-    const bush = new Mesh(bushGeometry, bushMaterial);
-    bush.position.set(x, 1.0, z);
-    bush.castShadow = true;
-    scene.add(bush);
-    vegetation.push(bush);
   }
 }
 
