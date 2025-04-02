@@ -320,88 +320,66 @@ function gameOver(reason = 'time') {
     bestScoreElement.textContent = localStorage.getItem('bestScore') || '0';
   }
 
-  // Précharger le son AVANT d'afficher l'écran
+  // Afficher IMMÉDIATEMENT l'écran de game over
+  gameOverScreen.style.display = 'flex';
+  
+  // Jouer le son sans attendre
   const laughSfx = document.getElementById('laugh-sfx') as HTMLAudioElement;
   if (laughSfx) {
-    // Forcer le chargement
-    laughSfx.load();
     laughSfx.currentTime = 0;
     laughSfx.volume = 1;
+    laughSfx.play();
     
-    // S'assurer que le son est prêt
-    laughSfx.oncanplaythrough = () => {
-      // Afficher l'écran et jouer le son SIMULTANÉMENT
-      gameOverScreen.style.display = 'flex';
-      laughSfx.play();
-      
-      // Appliquer le fade-out uniquement à la fin
-      if (audioContext) {
-        try {
-          // Réveiller l'AudioContext si nécessaire
-          if (audioContext.state === 'suspended') {
-            audioContext.resume();
-          }
-          
-          // Créer ou réutiliser la source
-          let source: MediaElementAudioSourceNode;
-          if (audioSources.has(laughSfx.id)) {
-            source = audioSources.get(laughSfx.id)!;
-          } else {
-            source = audioContext.createMediaElementSource(laughSfx);
-            audioSources.set(laughSfx.id, source);
-          }
-          
-          // Créer un GainNode pour le contrôle du volume
-          const gainNode = audioContext.createGain();
-          
-          // Connecter les nœuds
-          source.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          // Aucun fade-in, commencer directement à volume normal
-          gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-          
-          // Fade-out uniquement sur les 0.3 dernières secondes
-          const gameOverDuration = 5.0; // 5 secondes d'affichage
-          const fadeOutStartTime = audioContext.currentTime + (gameOverDuration - 0.3);
-          const fadeOutEndTime = audioContext.currentTime + gameOverDuration;
-          
-          gainNode.gain.setValueAtTime(1, fadeOutStartTime);
-          gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
-          
-          // Déconnecter le gainNode après la fin
-          setTimeout(() => {
-            gainNode.disconnect();
-          }, gameOverDuration * 1000 + 100);
-        } catch (error) {
-          console.error("Erreur lors du contrôle du volume:", error);
+    // Appliquer le fade-out uniquement à la fin si AudioContext est disponible
+    if (audioContext) {
+      try {
+        // Réveiller l'AudioContext si nécessaire
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
         }
+        
+        // Créer ou réutiliser la source
+        let source: MediaElementAudioSourceNode;
+        if (audioSources.has(laughSfx.id)) {
+          source = audioSources.get(laughSfx.id)!;
+        } else {
+          source = audioContext.createMediaElementSource(laughSfx);
+          audioSources.set(laughSfx.id, source);
+        }
+        
+        // Créer un GainNode pour le contrôle du volume
+        const gainNode = audioContext.createGain();
+        
+        // Connecter les nœuds
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Aucun fade-in, commencer directement à volume normal
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+        
+        // Fade-out uniquement sur les 0.3 dernières secondes
+        const gameOverDuration = 5.0; // 5 secondes d'affichage
+        const fadeOutStartTime = audioContext.currentTime + (gameOverDuration - 0.3);
+        const fadeOutEndTime = audioContext.currentTime + gameOverDuration;
+        
+        gainNode.gain.setValueAtTime(1, fadeOutStartTime);
+        gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
+        
+        // Déconnecter le gainNode après la fin
+        setTimeout(() => {
+          gainNode.disconnect();
+        }, gameOverDuration * 1000 + 100);
+      } catch (error) {
+        console.error("Erreur lors du contrôle du volume:", error);
       }
-      
-      // Programmer le redémarrage
-      console.log('Game Over: Reloading in 5 seconds...');
-      setTimeout(() => {
-        location.reload();
-      }, 5000);
-    };
-    
-    // En cas d'erreur de chargement, on continue quand même
-    laughSfx.onerror = () => {
-      console.warn("Erreur de chargement du son de rire");
-      gameOverScreen.style.display = 'flex';
-      console.log('Game Over: Reloading in 5 seconds...');
-      setTimeout(() => {
-        location.reload();
-      }, 5000);
-    };
-  } else {
-    // Si pas de son, afficher quand même l'écran
-    gameOverScreen.style.display = 'flex';
-    console.log('Game Over: Reloading in 5 seconds...');
-    setTimeout(() => {
-      location.reload();
-    }, 5000);
+    }
   }
+    
+  // Programmer le redémarrage
+  console.log('Game Over: Reloading in 5 seconds...');
+  setTimeout(() => {
+    location.reload();
+  }, 5000);
 }
 
 window.addEventListener('mousedown', (event) => {
