@@ -27,15 +27,15 @@ export function initializeCommandHandling(controls: PointerLockControls, _camera
         targetFov: defaultFov,
     };
 
-    const isFrenchLayout = navigator.language.toLowerCase().startsWith('fr');
-
     const onKeyDown = (event: KeyboardEvent) => {
         switch (event.code) {
             case 'ArrowUp':
-            case (isFrenchLayout ? 'KeyZ' : 'KeyW'):
+            case 'KeyW':
+            case 'KeyZ':
                 commandState.moveState.forward = true; break;
             case 'ArrowLeft':
-            case (isFrenchLayout ? 'KeyQ' : 'KeyA'):
+            case 'KeyA':
+            case 'KeyQ':
                 commandState.moveState.left = true; break;
             case 'ArrowDown':
             case 'KeyS':
@@ -66,10 +66,12 @@ export function initializeCommandHandling(controls: PointerLockControls, _camera
     const onKeyUp = (event: KeyboardEvent) => {
         switch (event.code) {
             case 'ArrowUp':
-            case (isFrenchLayout ? 'KeyZ' : 'KeyW'):
+            case 'KeyW':
+            case 'KeyZ':
                 commandState.moveState.forward = false; break;
             case 'ArrowLeft':
-            case (isFrenchLayout ? 'KeyQ' : 'KeyA'):
+            case 'KeyA':
+            case 'KeyQ':
                 commandState.moveState.left = false; break;
             case 'ArrowDown':
             case 'KeyS':
