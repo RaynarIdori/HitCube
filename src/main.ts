@@ -466,8 +466,8 @@ scene.add(ambientLight)
 const sunLight = new DirectionalLight(0xffffff, 2);
 sunLight.position.set(-30, 50, -20);
 sunLight.castShadow = true
-sunLight.shadow.mapSize.width = 4096
-sunLight.shadow.mapSize.height = 4096
+sunLight.shadow.mapSize.width = 1024
+sunLight.shadow.mapSize.height = 1024
 sunLight.shadow.camera.near = 0.5
 sunLight.shadow.camera.far = 500
 sunLight.shadow.camera.left = -shadowCamSize
