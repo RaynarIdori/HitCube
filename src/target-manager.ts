@@ -1,5 +1,5 @@
 import {
-    Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene
+    Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene, CylinderGeometry
 } from 'three';
 import { Target } from './interfaces';
 import {
@@ -10,14 +10,32 @@ let targets: Target[] = [];
 let activeTargetIds = new Set<number>();
 let designatedTarget: Target | null = null;
 
-const targetBaseGeometry = new BoxGeometry(1, 1, 1);
-const hatGeometry = new BoxGeometry(0.8, 0.1, 0.8);
-const vestPanelGeometry = new BoxGeometry(1.05, 0.7, 0.05);
-const shoeGeometry = new BoxGeometry(1.1, 0.1, 1.1);
+// Minecraft-style character geometries
+const headGeometry = new BoxGeometry(0.8, 0.8, 0.8);
+const bodyGeometry = new BoxGeometry(0.8, 1.2, 0.4);
+const armGeometry = new BoxGeometry(0.4, 1.2, 0.4);
+const legGeometry = new BoxGeometry(0.4, 0.6, 0.4);
 
+// Accessories - improved designs
+// Hat with brim and crown
+const hatTopGeometry = new BoxGeometry(0.7, 0.3, 0.7);
+const hatBrimGeometry = new BoxGeometry(1.1, 0.1, 1.1);
+
+// Vest panels
+const vestPanelFrontBackGeometry = new BoxGeometry(0.85, 1.3, 0.05);
+const vestPanelSideGeometry = new BoxGeometry(0.05, 1.3, 0.45);
+
+// Better defined shoes
+const shoeGeometry = new BoxGeometry(0.5, 0.2, 0.7); // Longer in z-direction for better shoe appearance
+
+// Pants
+const pantLegGeometry = new BoxGeometry(0.45, 0.8, 0.45);
+
+// Materials
 const hatMaterial = new MeshStandardMaterial({ color: 0x000000, name: 'hat' });
 const vestMaterial = new MeshStandardMaterial({ color: 0x0000cc, name: 'vest' });
 const shoeMaterial = new MeshStandardMaterial({ color: 0x00aa00, name: 'shoes' });
+const pantsMaterial = new MeshStandardMaterial({ color: 0x0033aa, name: 'pants' }); // Blue pants
 
 function spawnTarget(scene: Scene): Target | null {
     const availableIds = targetIdentities.filter(identity => !activeTargetIds.has(identity.id));
@@ -35,36 +53,96 @@ function spawnTarget(scene: Scene): Target | null {
 
     const baseMaterial = new MeshStandardMaterial({ color: selectedIdentity.baseColorHex });
     baseMaterial.name = 'base_cube';
-    const baseCube = new Mesh(targetBaseGeometry, baseMaterial);
-    baseCube.receiveShadow = false;
-    baseCube.userData = { isTargetBase: true };
-    targetGroup.add(baseCube);
+    
+    // Create Minecraft-style character parts
+    // Head
+    const head = new Mesh(headGeometry, baseMaterial.clone());
+    head.position.y = 1.6;
+    head.userData = { isTargetBase: true };
+    targetGroup.add(head);
+    
+    // Body
+    const body = new Mesh(bodyGeometry, baseMaterial.clone());
+    body.position.y = 0.6;
+    targetGroup.add(body);
+    
+    // Left arm
+    const leftArm = new Mesh(armGeometry, baseMaterial.clone());
+    leftArm.position.set(-0.6, 0.6, 0);
+    targetGroup.add(leftArm);
+    
+    // Right arm
+    const rightArm = new Mesh(armGeometry, baseMaterial.clone());
+    rightArm.position.set(0.6, 0.6, 0);
+    targetGroup.add(rightArm);
+    
+    // Left leg
+    const leftLeg = new Mesh(legGeometry, baseMaterial.clone());
+    leftLeg.position.set(-0.2, -0.3, 0);
+    targetGroup.add(leftLeg);
+    
+    // Right leg
+    const rightLeg = new Mesh(legGeometry, baseMaterial.clone());
+    rightLeg.position.set(0.2, -0.3, 0);
+    targetGroup.add(rightLeg);
 
+    // Add accessories based on identity
     if (selectedIdentity.hasHat) {
-        const hat = new Mesh(hatGeometry, hatMaterial.clone());
-        hat.position.y = 0.5 + 0.05;
-        targetGroup.add(hat);
+        // Create better hat with top and brim
+        const hatTop = new Mesh(hatTopGeometry, hatMaterial.clone());
+        hatTop.position.y = 2.15;
+        targetGroup.add(hatTop);
+        
+        const hatBrim = new Mesh(hatBrimGeometry, hatMaterial.clone());
+        hatBrim.position.y = 2.0;
+        targetGroup.add(hatBrim);
     }
+    
     if (selectedIdentity.hasVest) {
-        const vestFront = new Mesh(vestPanelGeometry, vestMaterial.clone());
-        vestFront.position.z = 0.5 + 0.025;
+        // Front vest panel
+        const vestFront = new Mesh(vestPanelFrontBackGeometry, vestMaterial.clone());
+        vestFront.position.set(0, 0.6, 0.225);
         targetGroup.add(vestFront);
-        const vestBack = new Mesh(vestPanelGeometry, vestMaterial.clone());
-        vestBack.position.z = -0.5 - 0.025;
+        
+        // Back vest panel
+        const vestBack = new Mesh(vestPanelFrontBackGeometry, vestMaterial.clone());
+        vestBack.position.set(0, 0.6, -0.225);
         targetGroup.add(vestBack);
-        const vestLeft = new Mesh(vestPanelGeometry, vestMaterial.clone());
-        vestLeft.rotation.y = Math.PI / 2;
-        vestLeft.position.x = -0.5 - 0.025;
+        
+        // Left vest panel
+        const vestLeft = new Mesh(vestPanelSideGeometry, vestMaterial.clone());
+        vestLeft.position.set(-0.425, 0.6, 0);
         targetGroup.add(vestLeft);
-        const vestRight = new Mesh(vestPanelGeometry, vestMaterial.clone());
-        vestRight.rotation.y = Math.PI / 2;
-        vestRight.position.x = 0.5 + 0.025;
+        
+        // Right vest panel
+        const vestRight = new Mesh(vestPanelSideGeometry, vestMaterial.clone());
+        vestRight.position.set(0.425, 0.6, 0);
         targetGroup.add(vestRight);
     }
+    
+    // Add pants (only if the target is supposed to have pants)
+    if (selectedIdentity.hasPants) {
+        // Left pant leg
+        const leftPant = new Mesh(pantLegGeometry, pantsMaterial.clone());
+        leftPant.position.set(-0.2, -0.3, 0);
+        targetGroup.add(leftPant);
+        
+        // Right pant leg
+        const rightPant = new Mesh(pantLegGeometry, pantsMaterial.clone());
+        rightPant.position.set(0.2, -0.3, 0);
+        targetGroup.add(rightPant);
+    }
+    
     if (selectedIdentity.hasShoes) {
-        const shoes = new Mesh(shoeGeometry, shoeMaterial.clone());
-        shoes.position.y = -0.5 - 0.05;
-        targetGroup.add(shoes);
+        // Left shoe - improved to look more like actual shoes
+        const leftShoe = new Mesh(shoeGeometry, shoeMaterial.clone());
+        leftShoe.position.set(-0.2, -0.7, 0.05); // Moved slightly forward
+        targetGroup.add(leftShoe);
+        
+        // Right shoe
+        const rightShoe = new Mesh(shoeGeometry, shoeMaterial.clone());
+        rightShoe.position.set(0.2, -0.7, 0.05); // Moved slightly forward
+        targetGroup.add(rightShoe);
     }
 
     let x, z;
@@ -72,7 +150,9 @@ function spawnTarget(scene: Scene): Target | null {
         x = (Math.random() - 0.5) * parkSpawnArea;
         z = (Math.random() - 0.5) * parkSpawnArea;
     } while (Math.sqrt(x * x + z * z) < minSpawnDist);
-    targetGroup.position.set(x, 0.6, z);
+    
+    // Position the character slightly higher to account for new proportions
+    targetGroup.position.set(x, 0.7, z);
 
     const velocity = new Vector3(
         (Math.random() - 0.5) * 2,
@@ -157,7 +237,9 @@ export function updateTargets(delta: number): void {
         target.mesh.position.addScaledVector(target.velocity, delta);
 
         target.mesh.position.x = Math.max(-parkBoundary, Math.min(parkBoundary, target.mesh.position.x));
+
         target.mesh.position.z = Math.max(-parkBoundary, Math.min(parkBoundary, target.mesh.position.z));
+
     }
 }
 

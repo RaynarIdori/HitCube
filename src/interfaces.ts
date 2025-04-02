@@ -8,6 +8,7 @@ export interface TargetIdentity {
     hasHat: boolean;
     hasVest: boolean;
     hasShoes: boolean;
+    hasPants: boolean;
 }
 
 export interface Target {
