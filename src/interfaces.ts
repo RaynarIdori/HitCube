@@ -1,4 +1,4 @@
-import { Group, Mesh, Vector3 } from 'three';
+import { Group, Mesh, Vector3, Scene as ThreeScene } from 'three';
 
 export interface TargetIdentity {
     id: number;
@@ -36,6 +36,4 @@ export interface ExplosionParticle {
     initialLife?: number;
 }
 
-// Add Scene type alias for use with THREE namespace
-import * as THREE from 'three';
-export type Scene = THREE.Scene; 
+export type Scene = ThreeScene;

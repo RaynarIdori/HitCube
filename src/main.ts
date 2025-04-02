@@ -37,7 +37,6 @@ import Stats from 'stats.js';
 
 const scene = new Scene()
 
-// Ajouter des styles pour empêcher la sélection de texte
 document.head.insertAdjacentHTML('beforeend', `
   <style>
     body, #score-display, #timer-display, #instructions, #objective-display, 
@@ -49,7 +48,6 @@ document.head.insertAdjacentHTML('beforeend', `
       -ms-user-select: none;
       cursor: default;
     }
-
     img, canvas {
       user-drag: none;
       -webkit-user-drag: none;
@@ -58,6 +56,22 @@ document.head.insertAdjacentHTML('beforeend', `
       -moz-user-select: none;
       -ms-user-select: none;
     }
+    #timer-display {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      z-index: 100;
+    }
+    #timer-display.warning { color: #ff9900; }
+    #timer-display.danger { color: #ff0000; }
   </style>
 `);
 
@@ -110,7 +124,6 @@ let timeRemaining = 30.0;
 let currentTargetTimer = 30.0;
 
 const camera = new PerspectiveCamera(defaultFov, window.innerWidth / window.innerHeight, 0.1, 1000)
-
 const renderer = new WebGLRenderer({ antialias: true })
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -124,7 +137,6 @@ rgbeLoader.load('sky.hdr', (texture) => {
   texture.mapping = EquirectangularReflectionMapping;
   scene.background = texture;
   scene.environment = texture;
-  console.log('Skybox HDR chargée.');
 }, undefined, (error) => {
   console.error('Erreur chargement skybox HDR :', error);
 });
@@ -156,12 +168,10 @@ camera.fov = defaultFov;
 camera.updateProjectionMatrix();
 
 controls.addEventListener('lock', () => {
-  console.log('Pointer LOCKED');
   document.body.classList.add('pointer-locked');
 });
 
 controls.addEventListener('unlock', () => {
-  console.log('Pointer UNLOCKED');
   document.body.classList.remove('pointer-locked');
 });
 
@@ -221,19 +231,14 @@ function gameOver(reason = 'time') {
   isGameOver = true;
   isGameStarted = false;
   controls.unlock();
-  console.log('Game Over - Controls unlocked. pointerLockElement:', document.pointerLockElement);
-  
-  // Update the game over reason text
+
   const gameOverReasonElement = document.getElementById('game-over-reason');
   if (gameOverReasonElement) {
-    if (reason === 'time') {
-      gameOverReasonElement.textContent = "Vous n'avez pas réussi la mission !";
-    } else {
-      gameOverReasonElement.textContent = "Vous avez eliminé la mauvaise cible !";
-    }
+    gameOverReasonElement.textContent = reason === 'time'
+      ? "Vous n'avez pas réussi la mission !"
+      : "Vous avez eliminé la mauvaise cible !";
   }
 
-  // Préparer l'écran de game over
   const finalScoreElement = document.getElementById('final-score');
   if (finalScoreElement) {
     finalScoreElement.textContent = score.toString();
@@ -243,30 +248,26 @@ function gameOver(reason = 'time') {
   if (score > bestScore) {
     localStorage.setItem('bestScore', score.toString());
   }
+
   const bestScoreElement = document.getElementById('best-score');
   if (bestScoreElement) {
     bestScoreElement.textContent = localStorage.getItem('bestScore') || '0';
   }
 
-  // Afficher IMMÉDIATEMENT l'écran de game over
   gameOverScreen.style.display = 'flex';
-  
-  // Jouer le son sans attendre
+
   const laughSfx = document.getElementById('laugh-sfx') as HTMLAudioElement;
   if (laughSfx) {
     laughSfx.currentTime = 0;
     laughSfx.volume = 1;
     laughSfx.play();
-    
-    // Appliquer le fade-out uniquement à la fin si AudioContext est disponible
+
     if (audioContext) {
       try {
-        // Réveiller l'AudioContext si nécessaire
         if (audioContext.state === 'suspended') {
           audioContext.resume();
         }
-        
-        // Créer ou réutiliser la source
+
         let source: MediaElementAudioSourceNode;
         if (audioSources.has(laughSfx.id)) {
           source = audioSources.get(laughSfx.id)!;
@@ -274,26 +275,19 @@ function gameOver(reason = 'time') {
           source = audioContext.createMediaElementSource(laughSfx);
           audioSources.set(laughSfx.id, source);
         }
-        
-        // Créer un GainNode pour le contrôle du volume
+
         const gainNode = audioContext.createGain();
-        
-        // Connecter les nœuds
         source.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        
-        // Aucun fade-in, commencer directement à volume normal
         gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-        
-        // Fade-out uniquement sur les 0.3 dernières secondes
-        const gameOverDuration = 5.0; // 5 secondes d'affichage
+
+        const gameOverDuration = 5.0;
         const fadeOutStartTime = audioContext.currentTime + (gameOverDuration - 0.3);
         const fadeOutEndTime = audioContext.currentTime + gameOverDuration;
-        
+
         gainNode.gain.setValueAtTime(1, fadeOutStartTime);
         gainNode.gain.linearRampToValueAtTime(0, fadeOutEndTime);
-        
-        // Déconnecter le gainNode après la fin
+
         setTimeout(() => {
           gainNode.disconnect();
         }, gameOverDuration * 1000 + 100);
@@ -302,9 +296,7 @@ function gameOver(reason = 'time') {
       }
     }
   }
-    
-  // Programmer le redémarrage
-  console.log('Game Over: Reloading in 5 seconds...');
+
   setTimeout(() => {
     location.reload();
   }, 5000);
@@ -315,14 +307,13 @@ window.addEventListener('mousedown', (event) => {
     canShoot = false;
     const shotSfx = document.getElementById('shot-sfx') as HTMLAudioElement;
     if (shotSfx) {
-        shotSfx.currentTime = 0;
-        shotSfx.play();
-        shotSfx.onended = () => {
-            canShoot = true;
-        };
+      shotSfx.currentTime = 0;
+      shotSfx.play();
+      shotSfx.onended = () => {
+        canShoot = true;
+      };
     }
 
-    console.log('FIRE Mousedown - Aiming:', commandState.isAiming, 'Locked:', controls.isLocked);
     event.preventDefault();
     mouse.x = 0; mouse.y = 0;
     raycaster.setFromCamera(mouse, camera);
@@ -351,15 +342,11 @@ window.addEventListener('mousedown', (event) => {
             }
           }
         );
-      } else {
-        console.log("Intersection detected, but failed to associate with a known target group.", hitObject);
       }
     }
   } else if (event.button === 0 && !controls.isLocked && isGameStarted && !isGameOver) {
-    console.log('CLICK Mousedown - Game Active, Not Locked -> Attempt Lock');
     controls.lock();
   } else if (event.button === 0 && !isGameStarted) {
-    console.log('CLICK Mousedown - Starting Game');
     isGameStarted = true;
     startScreen.style.display = 'none';
     document.body.classList.add('game-active');
@@ -368,13 +355,11 @@ window.addEventListener('mousedown', (event) => {
     if (sniperPovImage) sniperPovImage.style.display = 'block';
     if (objectiveDisplay) objectiveDisplay.style.display = 'block';
     instructions.style.display = 'block';
-    
+
     timeRemaining = 30.0;
     timerDisplay.innerHTML = timeRemaining.toFixed(1);
-    
+
     controls.lock();
-  } else if (isGameOver) {
-    console.log('CLICK Mousedown - Game is OVER, ignoring lock attempt.');
   }
 });
 
@@ -393,15 +378,13 @@ function animate(_time: number) {
 
   if (isGameStarted && !isGameOver) {
     timeRemaining -= delta;
-    
+
     if (timeRemaining <= 0) {
       timeRemaining = 0;
       gameOver('time');
     } else {
-      // Update timer display
       timerDisplay.innerHTML = timeRemaining.toFixed(1);
-      
-      // Visual warning when time is running low
+
       if (timeRemaining <= 5) {
         timerDisplay.classList.add('danger');
         timerDisplay.classList.remove('warning');
@@ -445,10 +428,9 @@ function animate(_time: number) {
 
   for (let i = explosionParticles.length - 1; i >= 0; i--) {
     const particle = explosionParticles[i];
-    
-    // Handle undefined life properties safely
+
     if (particle.life === undefined) continue;
-    
+
     particle.life -= delta;
 
     if (particle.life <= 0) {
@@ -457,8 +439,7 @@ function animate(_time: number) {
     } else {
       particle.mesh.position.addScaledVector(particle.velocity, delta);
       particle.velocity.y -= 9.8 * delta * 0.5;
-      
-      // Handle undefined initialLife property safely
+
       const initialLife = particle.initialLife ?? 1;
       (particle.mesh.material as MeshBasicMaterial).opacity = particle.life / initialLife;
     }
@@ -470,7 +451,7 @@ function animate(_time: number) {
 
 renderer.setAnimationLoop(animate);
 
-const concreteMaterial = new MeshStandardMaterial({ map: concreteTexture });
+const concreteMaterial = new MeshStandardMaterial({ map: concreteTexture() });
 const buildingSideMaterial = new MeshStandardMaterial({ color: 0xaaaaaa });
 
 const buildingMaterials = [
@@ -488,27 +469,32 @@ buildingMesh.position.y = buildingHeight / 2;
 buildingMesh.castShadow = true;
 buildingMesh.receiveShadow = true;
 scene.add(buildingMesh);
-const muretMaterial = new MeshStandardMaterial({ map: brickTexture });
+
+const muretMaterial = new MeshStandardMaterial({ map: brickTexture() });
 const wallZGeo = new BoxGeometry(buildingSize, muretHeight, muretThickness);
 const wallFront = new Mesh(wallZGeo, muretMaterial);
 wallFront.position.set(0, buildingHeight + muretHeight / 2, -buildingSize / 2 + muretThickness / 2);
 wallFront.castShadow = true;
 scene.add(wallFront);
+
 const wallBack = new Mesh(wallZGeo, muretMaterial.clone());
 wallBack.position.set(0, buildingHeight + muretHeight / 2, buildingSize / 2 - muretThickness / 2);
 wallBack.castShadow = true;
 scene.add(wallBack);
+
 const wallXGeo = new BoxGeometry(muretThickness, muretHeight, buildingSize);
 const wallLeft = new Mesh(wallXGeo, muretMaterial.clone());
 wallLeft.position.set(-buildingSize / 2 + muretThickness / 2, buildingHeight + muretHeight / 2, 0);
 wallLeft.castShadow = true;
 scene.add(wallLeft);
+
 const wallRight = new Mesh(wallXGeo, muretMaterial.clone());
 wallRight.position.set(buildingSize / 2 - muretThickness / 2, buildingHeight + muretHeight / 2, 0);
 wallRight.castShadow = true;
 scene.add(wallRight);
+
 const parkGeometry = new PlaneGeometry(parkSize, parkSize);
-const parkMaterial = new MeshStandardMaterial({ map: grassTexture, side: DoubleSide })
+const parkMaterial = new MeshStandardMaterial({ map: grassTexture(), side: DoubleSide })
 parkMaterial.metalness = 0.1
 parkMaterial.roughness = 0.9
 const parkPlane = new Mesh(parkGeometry, parkMaterial)
@@ -521,13 +507,13 @@ export const vegetation: Mesh[] = [];
 const treeTrunkGeometry = new CylinderGeometry(0.4, 0.5, 3.0, 12);
 const treeLeavesGeometry = new SphereGeometry(2.5, 16, 12);
 
-const treeTrunkMaterial = new MeshStandardMaterial({ 
-  map: willowTexture,
+const treeTrunkMaterial = new MeshStandardMaterial({
+  map: willowTexture(),
   roughness: 0.9,
   metalness: 0.1
 });
-const treeLeavesMaterial = new MeshStandardMaterial({ 
-  map: leafTexture,
+const treeLeavesMaterial = new MeshStandardMaterial({
+  map: leafTexture(),
   roughness: 0.7,
   metalness: 0.0
 });
@@ -562,7 +548,7 @@ for (let i = 0; i < numVegetationItems; i++) {
 }
 
 const fenceMaterial = new MeshStandardMaterial({
-  map: fenceTexture,
+  map: fenceTexture(),
   side: DoubleSide,
   transparent: true,
   alphaTest: 0.1
@@ -609,36 +595,8 @@ sunLight.shadow.camera.bottom = -shadowCamSize
 scene.add(sunLight)
 scene.add(sunLight.target)
 
-// Add CSS styles for the timer
-document.head.insertAdjacentHTML('beforeend', `
-  <style>
-    #timer-display {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: rgba(0, 0, 0, 0.5);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 5px;
-      font-family: 'Courier New', monospace;
-      font-size: 24px;
-      font-weight: bold;
-      z-index: 100;
-    }
-    
-    #timer-display.warning {
-      color: #ff9900;
-    }
-    
-    #timer-display.danger {
-      color: #ff0000;
-    }
-  </style>
-`);
-
 function resetTimer() {
-  currentTargetTimer = 2.5 + timeRemaining;
+  currentTargetTimer = 15 + timeRemaining;
   timeRemaining = currentTargetTimer;
   timerDisplay.innerHTML = timeRemaining.toFixed(1);
   timerDisplay.classList.remove('warning', 'danger');

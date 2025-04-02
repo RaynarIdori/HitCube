@@ -43,21 +43,12 @@ export function initializeCommandHandling(controls: PointerLockControls, _camera
             case 'ArrowRight':
             case 'KeyD':
                 commandState.moveState.right = true; break;
-
             case 'Space':
                 event.preventDefault();
                 if (controls.isLocked) {
                     commandState.isAiming = !commandState.isAiming;
                     commandState.targetFov = commandState.isAiming ? zoomedFov : defaultFov;
-                    if (commandState.isAiming) {
-                        console.log('Space -> Aiming ON, Adding scoped class');
-                        document.body.classList.add('scoped');
-                    } else {
-                        console.log('Space -> Aiming OFF, Removing scoped class');
-                        document.body.classList.remove('scoped');
-                    }
-                } else {
-                    console.log('Space pressed but pointer not locked');
+                    document.body.classList[commandState.isAiming ? 'add' : 'remove']('scoped');
                 }
                 break;
         }
@@ -86,4 +77,4 @@ export function initializeCommandHandling(controls: PointerLockControls, _camera
     document.addEventListener('keyup', onKeyUp);
 
     return commandState;
-} 
+}

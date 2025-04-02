@@ -2,11 +2,9 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -50,7 +48,6 @@ h1 {
 .card {
   padding: 2em;
 }
-
 .read-the-docs {
   color: #888;
 }
@@ -98,7 +95,11 @@ button:focus-visible {
   z-index: 20;
   border: 10px solid black;
   box-sizing: border-box;
-  background: radial-gradient(circle, rgba(0,0,0,0) 80%, rgba(0,0,0,0.9) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0) 80%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
 }
 
 body.scoped #scope-pov {
@@ -128,15 +129,15 @@ body.scoped #scope-pov {
 }
 
 .scope-line-vertical::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -4px;
-    width: 10px;
-    height: 10px;
-    background-color: #242424;
-    transform: translateY(-50%);
-    border-radius: 50%;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  background-color: #242424;
+  transform: translateY(-50%);
+  border-radius: 50%;
 }
 
 #instructions {
@@ -144,9 +145,13 @@ body.scoped #scope-pov {
   top: 20px;
   right: 20px;
   padding: 15px 20px;
-  background: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(30, 30, 30, 0.85));
+  background: linear-gradient(
+    135deg,
+    rgba(50, 50, 50, 0.9),
+    rgba(30, 30, 30, 0.85)
+  );
   color: #e0e0e0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 14px;
   line-height: 1.6;
   border-radius: 8px;
@@ -158,19 +163,19 @@ body.scoped #scope-pov {
   pointer-events: none;
   text-align: left;
   backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  transition: all 0.3s ease, opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  transition: all 0.3s ease, opacity 0.2s ease-in-out,
+    visibility 0.2s ease-in-out;
   opacity: 1;
   visibility: visible;
 }
 
 #instructions b {
-    font-weight: 600;
-    color: #ffffff;
-    background-color: rgba(0, 0, 0, 0.3);
-    padding: 2px 5px;
-    border-radius: 4px;
-    margin: 0 2px;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 2px 5px;
+  border-radius: 4px;
+  margin: 0 2px;
 }
 
 #objective-display {
@@ -178,9 +183,13 @@ body.scoped #scope-pov {
   bottom: 20px;
   left: 20px;
   padding: 15px 20px;
-  background: linear-gradient(135deg, rgba(30, 30, 30, 0.85), rgba(50, 50, 50, 0.9));
+  background: linear-gradient(
+    135deg,
+    rgba(30, 30, 30, 0.85),
+    rgba(50, 50, 50, 0.9)
+  );
   color: #e0e0e0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 16px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -189,7 +198,6 @@ body.scoped #scope-pov {
   max-width: 320px;
   display: none;
   backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
   transition: all 0.3s ease;
 }
 
@@ -223,9 +231,9 @@ body.scoped #scope-pov {
 }
 
 #objective-display .objective-status {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #ffcc80;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #ffcc80;
 }
 
 body.pointer-locked:not(.scoped) #objective-display {
@@ -237,9 +245,13 @@ body.pointer-locked:not(.scoped) #objective-display {
   top: 20px;
   left: 20px;
   padding: 12px 20px;
-  background: linear-gradient(135deg, rgba(50, 50, 50, 0.9), rgba(30, 30, 30, 0.85));
+  background: linear-gradient(
+    135deg,
+    rgba(50, 50, 50, 0.9),
+    rgba(30, 30, 30, 0.85)
+  );
   color: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 22px;
   font-weight: 600;
   border-radius: 8px;
@@ -248,8 +260,8 @@ body.pointer-locked:not(.scoped) #objective-display {
   z-index: 5;
   pointer-events: none;
   backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  transition: all 0.3s ease, opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  transition: all 0.3s ease, opacity 0.2s ease-in-out,
+    visibility 0.2s ease-in-out;
   opacity: 1;
   visibility: visible;
 }
@@ -288,7 +300,7 @@ body.pointer-locked:not(.scoped) #objective-display {
 }
 
 #restart-button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 15px 30px;
@@ -328,8 +340,8 @@ body.pointer-locked:not(.scoped) #objective-display {
   bottom: 0;
   left: 63%;
   transform: translateX(-50%);
-  width: 100%; 
-  max-width: 800px; 
+  width: 100%;
+  max-width: 800px;
   height: auto;
   pointer-events: none;
   z-index: 10;
@@ -340,16 +352,10 @@ body.game-active:not(.aiming) #sniper-pov {
   visibility: visible;
 }
 
-body.aiming #sniper-pov {
-  opacity: 0;
-  visibility: hidden;
-}
-
+body.aiming #sniper-pov,
 body.aiming #score-display,
 body.aiming #instructions,
 body.aiming #objective-display {
   opacity: 0;
   visibility: hidden;
 }
-
-/* CSS removed for unused kill counter */
