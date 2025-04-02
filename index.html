@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/aim-sniper.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HitCube</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="scope-pov">
+      <div class="scope-line scope-line-vertical"></div>
+      <div class="scope-line scope-line-horizontal"></div>
+    </div>
+    <img id="sniper-pov" src="pov/sniper.png" alt="Sniper View" style="display: none;">
+    <div id="objective-display"></div>
+    <audio id="shot-sfx" src="sfx/sniper-shot.wav" preload="auto"></audio>
+    <audio id="death-sfx" src="sfx/death.wav" preload="auto"></audio>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
