@@ -112,6 +112,7 @@ startScreen.id = 'start-screen';
 startScreen.innerHTML = `
   <div class="start-content">
     <h2>Cliquez pour commencer la partie</h2>
+    <p><i>Vous avez 30 secondes pour éliminer la cible designée</i></p>
   </div>
 `;
 document.body.appendChild(startScreen);
