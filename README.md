@@ -48,8 +48,5 @@ Les fichiers compilés seront disponibles dans le dossier `dist`.
 ## 📝 Licence
 Ce projet est sous licence MIT - voir le fichier LICENSE pour plus de détails.
 
-## 👨‍💻 Auteur
-- Votre nom
-
 ---
 *Ce projet a été créé dans le cadre d'un cours de développement créatif.* 
