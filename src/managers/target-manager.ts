@@ -1,10 +1,10 @@
 import {
     Group, Vector3, BoxGeometry, MeshStandardMaterial, Mesh, Scene, MeshBasicMaterial
 } from 'three';
-import { Target, TargetLimbs } from './interfaces';
+import { Target, TargetLimbs } from '../types/interfaces';
 import {
     targetIdentities, parkSpawnArea, minSpawnDist, targetSpeed, parkSize, numberOfTargets
-} from './constants';
+} from '../constants/constants';
 
 let targets: Target[] = [];
 let activeTargetIds = new Set<number>();

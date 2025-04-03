@@ -17,7 +17,7 @@ import {
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import {
   buildingHeight, buildingSize, parkSize, playerHeight, muretHeight, shadowCamSize
-} from './constants';
+} from '../constants/constants';
 
 let globalScene: Scene;
 let globalRenderer: WebGLRenderer;

@@ -1,4 +1,4 @@
-import './style.css'
+import './assets/style.css'
 import {
   Scene,
   PerspectiveCamera,
@@ -24,15 +24,15 @@ import {
 } from 'three'
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-import { ExplosionParticle, Target } from './interfaces';
+import { ExplosionParticle, Target } from './types/interfaces';
 import {
   buildingHeight, buildingSize, parkSize, playerHeight, muretHeight, muretThickness,
   defaultFov, particleLife, particleSpeed,
   playerMoveSpeed, fovLerpFactor, fenceHeight, shadowCamSize
-} from './constants';
-import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture } from './texture-manager';
-import { initializeCommandHandling, CommandState } from './commands';
-import { initializeTargets, updateTargets, getTargets, handleTargetHit as importedHandleTargetHit, checkAndSpawnTarget as importedCheckAndSpawnTarget } from './target-manager';
+} from './constants/constants';
+import { initializeTextures, brickTexture, concreteTexture, grassTexture, fenceTexture, willowTexture, leafTexture } from './managers/texture-manager';
+import { initializeCommandHandling, CommandState } from './core/commands';
+import { initializeTargets, updateTargets, getTargets, handleTargetHit as importedHandleTargetHit, checkAndSpawnTarget as importedCheckAndSpawnTarget } from './managers/target-manager';
 import Stats from 'stats.js';
 
 const scene = new Scene()

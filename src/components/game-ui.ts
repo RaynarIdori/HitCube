@@ -1,4 +1,4 @@
-import './style.css'
+import '../assets/style.css'
 
 export const scoreDisplay = document.getElementById('score') as HTMLElement;
 export const timerDisplay = document.getElementById('timer') as HTMLElement;

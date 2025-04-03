@@ -1,5 +1,5 @@
 import { TextureLoader, RepeatWrapping, Texture, SRGBColorSpace } from 'three';
-import { buildingSize, muretHeight, parkSize } from './constants';
+import { buildingSize, muretHeight, parkSize } from '../constants/constants';
 
 const textureLoader = new TextureLoader();
 const textures: Record<string, Texture> = {};

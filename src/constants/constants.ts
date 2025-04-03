@@ -1,5 +1,5 @@
-import { TargetIdentity } from './interfaces';
-import targetIdentitiesData from './data/target-identities.data.json';
+import { TargetIdentity } from '../types/interfaces';
+import targetIdentitiesData from '../data/target-identities.data.json';
 
 export const buildingHeight = 13.5, buildingSize = 20, parkSize = 250;
 export const playerHeight = 1.7, muretHeight = 0.5, muretThickness = 0.2;

@@ -5,8 +5,8 @@ import {
   Mesh,
   Scene
 } from 'three'
-import { ExplosionParticle } from './interfaces';
-import { particleLife, particleSpeed } from './constants';
+import { ExplosionParticle } from '../types/interfaces';
+import { particleLife, particleSpeed } from '../constants/constants';
 
 export const explosionParticles: ExplosionParticle[] = [];
 
