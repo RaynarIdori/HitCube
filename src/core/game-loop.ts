@@ -6,10 +6,10 @@ import {
   Clock
 } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
-import { Scene } from './interfaces';
+import { Scene } from '../types/interfaces';
 import { updateParticles } from './game-effects';
-import { updateTimerDisplay, gameOver, setAimingState } from './game-ui';
-import { defaultFov } from './constants';
+import { updateTimerDisplay, gameOver, setAimingState } from '../components/game-ui';
+import { defaultFov } from '../constants/constants';
 
 const clock = new Clock();
 const raycaster = new Raycaster();

@@ -1,6 +1,6 @@
 import { PerspectiveCamera } from 'three';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
-import { defaultFov, zoomedFov } from './constants';
+import { defaultFov, zoomedFov } from '../constants/constants';
 
 export interface MoveState {
     forward: boolean;

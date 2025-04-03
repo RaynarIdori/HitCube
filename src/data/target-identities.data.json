@@ -2,7 +2,7 @@
     {
         "id": 1,
         "name": "Bob le Bananier",
-        "description": "Cible jaune avec chapeau et pantalon, adore faire des blagues pourries.",
+        "description": "Personnage jaune avec chapeau et pantalon, adore faire des blagues pourries.",
         "baseColorHex": "0xffff00",
         "hasHat": true,
         "hasVest": false,
@@ -12,7 +12,7 @@
     {
         "id": 2,
         "name": "Maurice le Marin",
-        "description": "Cible cyan qui porte uniquement un gilet, perdu sans son pantalon.",
+        "description": "Individu cyan qui porte uniquement un gilet, perdu sans son pantalon.",
         "baseColorHex": "0x00ffff",
         "hasHat": false,
         "hasVest": true,
@@ -22,7 +22,7 @@
     {
         "id": 3,
         "name": "Sandrine Sans-Chapeau",
-        "description": "Cible magenta avec chaussures et pantalon, déteste les couvre-chefs.",
+        "description": "Personne magenta avec chaussures et pantalon, déteste les couvre-chefs.",
         "baseColorHex": "0xff00ff",
         "hasHat": false,
         "hasVest": false,
@@ -32,7 +32,7 @@
     {
         "id": 4,
         "name": "Blanco le Nudiste",
-        "description": "Cible blanche qui refuse tout vêtement, même un pantalon.",
+        "description": "Personnage blanc qui refuse tout vêtement, même un pantalon.",
         "baseColorHex": "0xffffff",
         "hasHat": false,
         "hasVest": false,
@@ -42,7 +42,7 @@
     {
         "id": 5,
         "name": "Grisou le Fashion",
-        "description": "Cible grise avec chapeau, chaussures et pantalon, mais refuse les gilets.",
+        "description": "Individu gris avec chapeau, chaussures et pantalon, mais refuse les gilets.",
         "baseColorHex": "0x888888",
         "hasHat": true,
         "hasVest": false,
@@ -52,7 +52,7 @@
     {
         "id": 6,
         "name": "Citron le Frileux",
-        "description": "Cible jaune avec gilet uniquement, a oublié son pantalon chez lui.",
+        "description": "Personnage jaune avec gilet uniquement, a oublié son pantalon chez lui.",
         "baseColorHex": "0xffff00",
         "hasHat": false,
         "hasVest": true,
@@ -62,7 +62,7 @@
     {
         "id": 7,
         "name": "Chausette Bleue",
-        "description": "Cible cyan avec chaussures et pantalon, est allergique aux chapeaux.",
+        "description": "Individu cyan avec chaussures et pantalon, est allergique aux chapeaux.",
         "baseColorHex": "0x00ffff",
         "hasHat": false,
         "hasVest": false,
@@ -72,7 +72,7 @@
     {
         "id": 8,
         "name": "Maggy le Coquin",
-        "description": "Cible magenta avec chapeau, mais sans pantalon ni chaussures.",
+        "description": "Personnage magenta avec chapeau, mais sans pantalon ni chaussures.",
         "baseColorHex": "0xff00ff",
         "hasHat": true,
         "hasVest": false,
@@ -82,7 +82,7 @@
     {
         "id": 9,
         "name": "Neige le Corporate",
-        "description": "Cible blanche avec gilet professionnel et pantalon, mais pieds nus.",
+        "description": "Individu blanc avec gilet professionnel et pantalon, mais pieds nus.",
         "baseColorHex": "0xffffff",
         "hasHat": false,
         "hasVest": true,
@@ -92,7 +92,7 @@
     {
         "id": 10,
         "name": "Gris-Gris le Complet",
-        "description": "Cible grise hyper équipée avec chapeau, gilet, chaussures et pantalon.",
+        "description": "Personnage gris hyper équipé avec chapeau, gilet, chaussures et pantalon.",
         "baseColorHex": "0x888888",
         "hasHat": true,
         "hasVest": true,
@@ -102,7 +102,7 @@
     {
         "id": 11,
         "name": "Jaunisse le Danseur",
-        "description": "Cible jaune obsédée par ses chaussures, mais sans pantalon.",
+        "description": "Individu jaune obsédé par ses chaussures, mais sans pantalon.",
         "baseColorHex": "0xffff00",
         "hasHat": false,
         "hasVest": false,
@@ -112,7 +112,7 @@
     {
         "id": 12,
         "name": "Turquoise l'Intellectuel",
-        "description": "Cible cyan avec chapeau distingué et pantalon élégant.",
+        "description": "Personnage cyan avec chapeau distingué et pantalon élégant.",
         "baseColorHex": "0x00ffff",
         "hasHat": true,
         "hasVest": false,
@@ -122,7 +122,7 @@
     {
         "id": 13,
         "name": "Fuchsia le Modeste",
-        "description": "Cible magenta avec gilet uniquement, la pudeur ne va pas plus bas.",
+        "description": "Individu magenta avec gilet uniquement, la pudeur ne va pas plus bas.",
         "baseColorHex": "0xff00ff",
         "hasHat": false,
         "hasVest": true,
@@ -132,7 +132,7 @@
     {
         "id": 14,
         "name": "Neigeux le Paradoxe",
-        "description": "Cible blanche qui protège sa tête et ses pieds, et porte un pantalon.",
+        "description": "Personnage blanc qui protège sa tête et ses pieds, et porte un pantalon.",
         "baseColorHex": "0xffffff",
         "hasHat": true,
         "hasVest": false,
@@ -142,7 +142,7 @@
     {
         "id": 15,
         "name": "Grisâtre le Minimaliste",
-        "description": "Cible grise avec gilet uniquement, refuse tout autre accessoire.",
+        "description": "Individu gris avec gilet uniquement, refuse tout autre accessoire.",
         "baseColorHex": "0x888888",
         "hasHat": false,
         "hasVest": true,
@@ -152,7 +152,7 @@
     {
         "id": 16,
         "name": "Soleil le Timide",
-        "description": "Cible jaune avec chapeau, gilet et pantalon, mais pas de chaussures.",
+        "description": "Personnage jaune avec chapeau, gilet et pantalon, mais pas de chaussures.",
         "baseColorHex": "0xffff00",
         "hasHat": true,
         "hasVest": true,
@@ -162,7 +162,7 @@
     {
         "id": 17,
         "name": "Azur le Pressé",
-        "description": "Cible cyan avec gilet et chaussures, a oublié son pantalon en partant.",
+        "description": "Individu cyan avec gilet et chaussures, a oublié son pantalon en partant.",
         "baseColorHex": "0x00ffff",
         "hasHat": false,
         "hasVest": true,
@@ -172,7 +172,7 @@
     {
         "id": 18,
         "name": "Rosâtre le Sensible",
-        "description": "Cible magenta avec chapeau, chaussures et pantalon, mais sans gilet.",
+        "description": "Personnage magenta avec chapeau, chaussures et pantalon, mais sans gilet.",
         "baseColorHex": "0xff00ff",
         "hasHat": true,
         "hasVest": false,
@@ -182,7 +182,7 @@
     {
         "id": 19,
         "name": "Blanc-Bec l'Exhibitionniste",
-        "description": "Cible blanche avec chapeau et gilet mais sans pantalon ni chaussures.",
+        "description": "Individu blanc avec chapeau et gilet mais sans pantalon ni chaussures.",
         "baseColorHex": "0xffffff",
         "hasHat": true,
         "hasVest": true,
@@ -192,7 +192,7 @@
     {
         "id": 20,
         "name": "Poivre le Stylé",
-        "description": "Cible grise avec chapeau, gilet et pantalon, mais déteste les chaussures.",
+        "description": "Personnage gris avec chapeau, gilet et pantalon, mais déteste les chaussures.",
         "baseColorHex": "0x888888",
         "hasHat": true,
         "hasVest": true,
@@ -202,7 +202,7 @@
     {
         "id": 21,
         "name": "Fuchsia Full Options",
-        "description": "Cible magenta avec tout l'attirail: chapeau, gilet, chaussures et pantalon.",
+        "description": "Individu magenta avec tout l'attirail: chapeau, gilet, chaussures et pantalon.",
         "baseColorHex": "0xff00ff",
         "hasHat": true,
         "hasVest": true,
@@ -212,7 +212,7 @@
     {
         "id": 22,
         "name": "Blanc-Blanc le Marcheur",
-        "description": "Cible blanche qui porte uniquement des chaussures, sans pantalon.",
+        "description": "Personnage blanc qui porte uniquement des chaussures, sans pantalon.",
         "baseColorHex": "0xffffff",
         "hasHat": false,
         "hasVest": false,
@@ -222,7 +222,7 @@
     {
         "id": 23,
         "name": "Bleuâtre le Business",
-        "description": "Cible cyan avec chapeau, gilet et pantalon, mais pieds nus par choix.",
+        "description": "Individu cyan avec chapeau, gilet et pantalon, mais pieds nus par choix.",
         "baseColorHex": "0x00ffff",
         "hasHat": true,
         "hasVest": true,
@@ -232,7 +232,7 @@
     {
         "id": 24,
         "name": "Banane le Coureur",
-        "description": "Cible jaune avec chapeau et chaussures, mais sans pantalon pour courir plus vite.",
+        "description": "Personnage jaune avec chapeau et chaussures, mais sans pantalon pour courir plus vite.",
         "baseColorHex": "0xffff00",
         "hasHat": true,
         "hasVest": false,
@@ -242,7 +242,7 @@
     {
         "id": 25,
         "name": "Gris-Gris le Marcheur",
-        "description": "Cible grise avec chaussures et pantalon, mais tête découverte.",
+        "description": "Individu gris avec chaussures et pantalon, mais tête découverte.",
         "baseColorHex": "0x888888",
         "hasHat": false,
         "hasVest": false,
